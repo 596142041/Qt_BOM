@@ -27,38 +27,39 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QJsonValueRef>
-typedef struct _Write_HEAD_INDEX
+typedef struct _Write_Column_INDEX
 {
-    int Model_Name_B;
-    int Factory_B;
-    int Description_B;
-    int Point_B;
-    int Quantity_B;
-    int Model_Name_A;
-    int Factory_A;
-    int Description_A;
-    int Point_A;
-    int Quantity_A;
     int Change_type;
-}Write_HEAD_INDEX;
-typedef struct _Excel_Column
+    int Description_A;
+    int Description_B;
+    int Factory_A;
+    int Factory_B;
+    int Model_Name_A;
+    int Model_Name_B;
+    int Point_A;
+    int Point_B;
+    int Quantity_A;
+    int Quantity_B;
+}Write_Column_INDEX;
+typedef struct _BOM_Column
 {
-int Quantity_Column;
-int Point_Column;
-int MPN_Column;
-int Factory_Column;
-int MPN1_Column;
-int Factory1_Column;
-int Column_OFFSET;
-}Excel_Column;
-typedef struct _Column_Width {
+    int Column_OFFSET;
+    int Quantity_Column;
+    int Point_Column;
+    int MPN1_Column;
+    int MPN_Column;
+    int Factory_Column;
+    int Factory1_Column;
+
+}BOM_Column;
+typedef struct _Write_Column_Width {
     int MPN_width;
     int Factory_width;
     int Description_width;
     int Point_width;
     int Quantity_width;
     int Change_type_width;
-}Column_Width;
+}Write_Column_Width;
 class Json_resolve : public QObject
 {
     Q_OBJECT
@@ -68,9 +69,9 @@ public:
     void Json_Set_KeyValue(const QString File_Name,const QString key,const QString value);
     QString Json_Get_KeyValue(const QString File_Name,const QString key);
     void Json_update(const QString File_Name);
-    Excel_Column BOM_excel_column;
-    Column_Width Wirte_Column_Width;
-    Write_HEAD_INDEX Write_excel_index;
+    BOM_Column BOM_excel_column;
+    Write_Column_Width Wirte_Column_width;
+    Write_Column_INDEX Write_Column_index;
 signals:
 
 };
