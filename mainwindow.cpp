@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 设置固定行高
     ui->tableWidgetdiff->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->progressBar->setValue (0);
-    ui->pushButton_tst->setEnabled (false);
+    ui->pushButton_tst->setEnabled (true);
     ui->lineEdit_savepath->setReadOnly (true);
 }
 
@@ -131,6 +131,15 @@ void MainWindow::Excel_SetTitle(QXlsx::Document *pDocument)
 {
     //pDocument->write ()
 }
+void MainWindow::Excel_update()
+{
+    json->Json_update ("config.json");
+    if(json->BOM_excel_column.Column_OFFSET ==0)
+    {
+        json->BOM_excel_column.Column_OFFSET = Excel_Column_INDEX::Column_OFFSET;
+    }
+
+}
 int MainWindow::Get_Row(const QString File_Name,const QString str,int column)
 {
     // qDebug()<<Name;
@@ -160,7 +169,7 @@ int MainWindow::Get_Row(const QString File_Name,const QString str,int column)
 }
 void MainWindow::on_pushButton_open_clicked()
 {
-    QString path = json->Json_Get_KeyValue("BOM.json","After_file_history");
+    QString path = json->Json_Get_KeyValue("config.json","After_file_history");//.replace("\\","/");
     qDebug()<<"File_Name_New path"<<path;
     File_Name_New = QFileDialog::getOpenFileName(this,
                                                  tr("Open files"),
@@ -171,14 +180,12 @@ void MainWindow::on_pushButton_open_clicked()
             return;
     }
     QFileInfo fileInfo(File_Name_New);
-//    qDebug()<<"fileInfo.fileName"<<fileInfo.fileName ();
-//    qDebug()<<"fileInfo.path"<<fileInfo.path ();
-    json->Json_Set_KeyValue("BOM.json","After_file_history",fileInfo.absoluteFilePath ());
+    json->Json_Set_KeyValue("config.json","After_file_history",fileInfo.absoluteFilePath ());
     ui->lineEdit_FileName->setText (fileInfo.fileName ());
 }
 void MainWindow::on_pushButton_open_old_clicked()
 {
-    QString path = json->Json_Get_KeyValue("BOM.json","Befor_file_history");
+    QString path = json->Json_Get_KeyValue("config.json","Befor_file_history");
     qDebug()<<"File_Name_Old path"<<path;
     File_Name_Old = QFileDialog::getOpenFileName(this,
                                                  tr("Open files"),
@@ -189,7 +196,7 @@ void MainWindow::on_pushButton_open_old_clicked()
             return;
     }
     QFileInfo fileInfo(File_Name_Old);
-    json->Json_Set_KeyValue("BOM.json","Befor_file_history",fileInfo.absoluteFilePath ());
+    json->Json_Set_KeyValue("config.json","Befor_file_history",fileInfo.absoluteFilePath ());
     ui->lineEdit_FileName_old->setText (fileInfo.fileName ());
 }
 /*
@@ -694,7 +701,9 @@ void MainWindow::on_pushButton_open_cmp_clicked()
 
 void MainWindow::on_pushButton_tst_clicked()
 {
-    json->Json_Resolve ("BOM.json");
+    //json->Json_update ("config.json");
+// QString path = json->Json_Get_KeyValue("config.json","After_file_history").replace("\\","/");
+// qDebug()<<"path:"<<path;
 //    QStringList mpnA_list = Read_colum_List (File_Name_New,2,Excel_Column_INDEX::MPN_Column);
 //    qDebug()<<"\n mpnA_list"<<mpnA_list<<"\n";
 #if 0

@@ -59,16 +59,13 @@ typedef enum _COLUMN_With {
 //Excel中各项列号
 typedef enum _Excel_Column_INDEX
 {
-Quantity_Column = 3,
-Point_Column = 4,
-
-MPN_Column = 5,
-Factory_Column = 6,
-
-MPN1_Column = 7,
-Factory1_Column = 8,
-
-Column_OFFSET =2
+    Quantity_Column = 3,
+    Point_Column = 4,
+    MPN_Column = 5,
+    Factory_Column = 6,
+    MPN1_Column = 7,
+    Factory1_Column = 8,
+    Column_OFFSET =2
 }Excel_Column_INDEX;
 //---------------------------
 QT_BEGIN_NAMESPACE
