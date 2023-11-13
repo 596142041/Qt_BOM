@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 设置固定行高
     ui->tableWidgetdiff->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->progressBar->setValue (0);
-    ui->pushButton_tst->setEnabled (true);
+    ui->pushButton_tst->setEnabled (false);
     ui->lineEdit_savepath->setReadOnly (true);
 }
 
