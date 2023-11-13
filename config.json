@@ -1,6 +1,6 @@
 {
     "Befor_file_history": "P:/Project/Qt_prj/QtExcel/build-QtExcel-Desktop_Qt_5_15_2_MSVC2019_64bit-Release/SE250H_REV2_BOM.xlsx",
-    "Column_Width": {
+    "Write_Column_Width": {
         "Change_type_With": 16,
         "Description_With": 20,
         "Factory_With": 17,
@@ -8,7 +8,7 @@
         "Point_With": 90,
         "Quantity_With": 9
     },
-    "Excel_Column": {
+    "BOM_Column": {
         "Column_OFFSET": 2,
         "Factory1_Column": 8,
         "Factory_Column": 6,
