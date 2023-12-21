@@ -38,4 +38,4 @@ Qt_BOM(GCC)
 *.rar
 *vscode*
 config.json
-*.pro.user
+QtExcel.pro.user
