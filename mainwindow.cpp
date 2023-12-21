@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     str_cmp = new Qstring_cmp();
     json  = new Json_resolve();//开始解析
     cell_Item = new QTableWidgetItem;
+    Write_xlsx = new QXlsx::Document;
     ui->setupUi(this);
     // 每次选中一个单元格
     ui->tableWidgetdiff->setSelectionBehavior(QAbstractItemView::SelectItems);
@@ -26,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 设置固定行高
     ui->tableWidgetdiff->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->progressBar->setValue (0);
+    ui->progressBar->setAlignment (Qt::AlignCenter);
     ui->pushButton_tst->setEnabled (false);
     ui->lineEdit_savepath->setReadOnly (true);
 }
@@ -138,7 +140,21 @@ void MainWindow::Excel_update()
     {
         json->BOM_excel_column.Column_OFFSET = Excel_Column_INDEX::Column_OFFSET;
     }
-
+    //-------------保存不同项目----------
+    QString Write_xlsx_name =QDateTime::currentDateTime().toString("MMdd-hh-mm-ss-zzz").append (".xlsx");
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_A, COLUMN_With::Model_Name_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_B, COLUMN_With::Model_Name_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Factory_A, COLUMN_With::Factory_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Factory_B, COLUMN_With::Factory_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Description_A, COLUMN_With::Description_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Description_B, COLUMN_With::Description_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Point_A, COLUMN_With::Point_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Point_B, COLUMN_With::Point_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Quantity_A, COLUMN_With::Quantity_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Quantity_B, COLUMN_With::Quantity_With);
+    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Change_type, COLUMN_With::Change_type_With);
+    Write_xlsx->setRowHeight(1,20);
+    Write_xlsx->saveAs (Write_xlsx_name);
 }
 int MainWindow::Get_Row(const QString File_Name,const QString str,int column)
 {
@@ -169,8 +185,8 @@ int MainWindow::Get_Row(const QString File_Name,const QString str,int column)
 }
 void MainWindow::on_pushButton_open_clicked()
 {
-    QString path = json->Json_Get_KeyValue("config.json","After_file_history");//.replace("\\","/");
-    qDebug()<<"File_Name_New path"<<path;
+    QString path = json->Json_Get_KeyValue("config.json","After_file_history");
+//    qDebug()<<"File_Name_New path"<<path;
     File_Name_New = QFileDialog::getOpenFileName(this,
                                                  tr("Open files"),
                                                  path,
@@ -186,7 +202,7 @@ void MainWindow::on_pushButton_open_clicked()
 void MainWindow::on_pushButton_open_old_clicked()
 {
     QString path = json->Json_Get_KeyValue("config.json","Befor_file_history");
-    qDebug()<<"File_Name_Old path"<<path;
+//    qDebug()<<"File_Name_Old path"<<path;
     File_Name_Old = QFileDialog::getOpenFileName(this,
                                                  tr("Open files"),
                                                  path,
@@ -201,9 +217,7 @@ void MainWindow::on_pushButton_open_old_clicked()
 }
 /*
 注意命名:A表示新的BOM里面的数据
-
 */
-
 void MainWindow::on_pushButton_open_cmp_clicked()
 {
     if(File_Name_New.isNull()||File_Name_Old.isNull())
@@ -211,8 +225,9 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             return;
     }
     //-------------保存不同项目----------
-    QDateTime current_date_time =QDateTime::currentDateTime();
-    QString diff_name =current_date_time.toString("MMdd-hh-mm-ss-zzz").append (".xlsx");
+    QFileInfo File_Info;
+    File_Info.setFile (File_Name_New);
+    QString diff_name =QDateTime::currentDateTime().toString("变更_MMdd_hms").append (".xlsx").prepend(File_Info.baseName ());
     QXlsx::Document diff_xlsx(diff_name);//用于保存不同项
     diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_A, COLUMN_With::Model_Name_With);
     diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_B, COLUMN_With::Model_Name_With);
@@ -232,14 +247,25 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     QXlsx::Format Format_diff_A;// 设置字体颜色
     QXlsx::Format Format_diff_B;// 设置字体颜色
     QXlsx::Format Format_cell;//单元格格式,此处需要注意
+
+    Format_same.setFontName("宋体");      // 设置字体
+    Format_same.setFontColor (Qt::black);
+    Format_same.setFontBold(false);       // 设置加粗
+    Format_same.setFontSize(12);         // 设置字体大小
+    Format_same.setFontItalic(false);     // 设置倾斜
+
+
     Format_cell.setBorderStyle (QXlsx::Format::BorderThin);
     Format_cell.setHorizontalAlignment(QXlsx::Format::AlignLeft);// 设置水平左对齐
     Format_cell.setVerticalAlignment(QXlsx::Format::AlignVCenter);// 设置垂直居中
+    Format_cell.setFontName ("宋体");
+    Format_cell.setFontSize (12);
     //设置自动换行
     Format_same.setTextWarp(true);
     Format_diff_A.setTextWarp(true);
     Format_diff_B.setTextWarp(true);
     Format_cell.setTextWarp(true);
+
     //表头
     diff_xlsx.mergeCells("A1:E1");//合并单元格
     diff_xlsx.mergeCells("F1:J1");
@@ -355,7 +381,6 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_same.setFontBold(false);       // 设置加粗
             Format_same.setFontSize(12);         // 设置字体大小
             Format_same.setFontItalic(false);     // 设置倾斜
-            Format_same.setFontName("宋体");      // 设置字体
             //旧版本BOM不同部分颜色
             Format_diff_B.setFontColor (QColor(0, 176, 240));
             Format_diff_B.setFontBold(true);       // 设置加粗
@@ -445,7 +470,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
                 Format_same.setFontBold(false);       // 设置加粗
                 Format_same.setFontSize(12);         // 设置字体大小
                 Format_same.setFontItalic(false);     // 设置倾斜
-                Format_same.setFontName("宋体");      // 设置字体
+
                 //旧版本BOM不同部分颜色
                 Format_diff_B.setFontColor (QColor(0, 176, 240));
                 Format_diff_B.setFontBold(true);       // 设置加粗
@@ -492,7 +517,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         ui->progressBar->setValue (pros_cnt);
     }
 
-    //遍历A中不同项目
+    //遍历A(变更后)中不同项目
     dis_start = diff_row;
     foreach (const QString& filename, diffA_list)//遍历
     {
@@ -582,7 +607,6 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         //------------------------------------------------------
         //旧版本BOM不同部分颜色
         Format_diff_B.setFontColor (QColor(0, 176, 240));
-
         Format_diff_B.setFontSize(12);         // 设置字体大小
         Format_diff_B.setFontItalic(false);     // 设置倾斜
         Format_diff_B.setFontName("宋体");      // 设置字体
@@ -701,6 +725,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
 
 void MainWindow::on_pushButton_tst_clicked()
 {
+    Excel_update();
     //json->Json_update ("config.json");
 // QString path = json->Json_Get_KeyValue("config.json","After_file_history").replace("\\","/");
 // qDebug()<<"path:"<<path;
