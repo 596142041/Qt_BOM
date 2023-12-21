@@ -13,7 +13,6 @@ void Json_resolve::Json_Resolve(const QString file_name)
     if(file_json.open (QIODevice::ReadOnly|QIODevice::Text) == false)
     {
         qDebug()<<"文件错误";
-
     }
     //读取所有内容
     QString str_all = file_json.readAll ();
