@@ -37,3 +37,5 @@ Qt_BOM(GCC)
 测试数据记录
 *.rar
 *vscode*
+config.json
+*.pro.user
