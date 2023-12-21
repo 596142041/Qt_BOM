@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QTableWidgetItem>
 #include <QDateTime>
+#include <QFileInfo>
 
 //---
 #include "xlsxdocument.h"
@@ -87,9 +88,7 @@ public:
 
 private slots:
     void on_pushButton_open_clicked();
-
     void on_pushButton_open_old_clicked();
-
     void on_pushButton_open_cmp_clicked();
     void on_pushButton_tst_clicked();
 
@@ -102,6 +101,7 @@ private:
     QTableWidgetItem *cell_Item;
     Json_resolve *json;
     void Excel_update();
-
+    QXlsx::Document *Write_xlsx;
+    QString Write_xlsx_name;
 };
 #endif // MAINWINDOW_H
