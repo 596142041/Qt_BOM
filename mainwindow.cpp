@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     cell_Item = new QTableWidgetItem;
     Write_xlsx = new QXlsx::Document;
     ui->setupUi(this);
+     setWindowFlags(Qt::WindowMinimizeButtonHint|Qt::WindowCloseButtonHint); // 设置禁止最大化
     // 每次选中一个单元格
     ui->tableWidgetdiff->setSelectionBehavior(QAbstractItemView::SelectItems);
 
@@ -185,8 +186,8 @@ int MainWindow::Get_Row(const QString File_Name,const QString str,int column)
 }
 void MainWindow::on_pushButton_open_clicked()
 {
-    QString path = json->Json_Get_KeyValue("config.json","After_file_history");
-//    qDebug()<<"File_Name_New path"<<path;
+    QString path = json->Json_Get_KeyValue("config.json","变更后文件路径");
+    qDebug()<<"File_Name_New path"<<path;
     File_Name_New = QFileDialog::getOpenFileName(this,
                                                  tr("Open files"),
                                                  path,
@@ -196,12 +197,12 @@ void MainWindow::on_pushButton_open_clicked()
             return;
     }
     QFileInfo fileInfo(File_Name_New);
-    json->Json_Set_KeyValue("config.json","After_file_history",fileInfo.absoluteFilePath ());
+    json->Json_Set_KeyValue("config.json","变更后文件路径",fileInfo.absoluteFilePath ());
     ui->lineEdit_FileName->setText (fileInfo.fileName ());
 }
 void MainWindow::on_pushButton_open_old_clicked()
 {
-    QString path = json->Json_Get_KeyValue("config.json","Befor_file_history");
+    QString path = json->Json_Get_KeyValue("config.json","变更前文件路径");
 //    qDebug()<<"File_Name_Old path"<<path;
     File_Name_Old = QFileDialog::getOpenFileName(this,
                                                  tr("Open files"),
@@ -212,7 +213,8 @@ void MainWindow::on_pushButton_open_old_clicked()
             return;
     }
     QFileInfo fileInfo(File_Name_Old);
-    json->Json_Set_KeyValue("config.json","Befor_file_history",fileInfo.absoluteFilePath ());
+//    qDebug()<<"File_Name_Old path:"<<fileInfo.path();
+    json->Json_Set_KeyValue("config.json","变更前文件路径",fileInfo.absoluteFilePath ());
     ui->lineEdit_FileName_old->setText (fileInfo.fileName ());
 }
 /*
@@ -227,7 +229,9 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     //-------------保存不同项目----------
     QFileInfo File_Info;
     File_Info.setFile (File_Name_New);
-    QString diff_name =QDateTime::currentDateTime().toString("变更_MMdd_hms").append (".xlsx").prepend(File_Info.baseName ());
+//    qDebug()<<"File_Name_New.path()"<<File_Info.path();
+    QString diff_name =QDateTime::currentDateTime().toString("_变更记录-MMdd_hms").append (".xlsx").prepend(File_Info.path()+"/"+File_Info.baseName ());
+//    qDebug()<<"diff_name:"<<diff_name;
     QXlsx::Document diff_xlsx(diff_name);//用于保存不同项
     diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_A, COLUMN_With::Model_Name_With);
     diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_B, COLUMN_With::Model_Name_With);
@@ -275,7 +279,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     format.setFontBold(true);       // 设置加粗
     format.setFontSize(14);         // 设置字体大小
     format.setFontItalic(false);     // 设置倾斜
-    format.setFontName("楷体");      // 设置字体
+    format.setFontName("宋体");      // 设置字体
     format.setFontColor(QColor(0, 176, 240));   // 设置蓝色
     format.setPatternBackgroundColor(QColor(255, 255, 255));    // 设置单元格背景颜色
     format.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
@@ -404,7 +408,6 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             //---------------写入位号----------------
             QXlsx::RichString *rich_diffA = new QXlsx::RichString(); //此处是第一个大的问题点
             QXlsx::RichString *rich_diffB = new QXlsx::RichString();
-
             Format_same.setFontBold (false);
             Format_same.setHorizontalAlignment(QXlsx::Format::AlignLeft); //设置左对齐
             Format_same.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
@@ -435,9 +438,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             rich_diffA->addFragment (str_cmp->diff_A,Format_diff_A);
             Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignLeft); //设置左对齐
             Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter); // 设置水平居中
-
             rich_diffB->addFragment (str_cmp->diff_B,Format_diff_B);
-
             diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Point_A,*rich_diffA,Format_cell);
             diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Point_B,*rich_diffB,Format_cell);
             //写入描述信息
@@ -719,6 +720,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     ui->lineEdit_savepath->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
     ui->lineEdit_savepath->setText (diff_name);
     ui->lineEdit_savepath->setReadOnly (true);
+    json->Json_Set_KeyValue("config.json","比较结果文件路径",diff_name);
     delete dis_diffA_list;
     delete dis_diffA_Factory_list;
 }
@@ -869,6 +871,4 @@ void MainWindow::on_pushButton_tst_clicked()
     xlsx.save();
 #endif
 }
-
-
 
