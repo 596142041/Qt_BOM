@@ -632,10 +632,10 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_diff_B.setBorderStyle(QXlsx::Format::BorderThin);      // 设置边框
             int Quantity_B = Read_cell_B.count (",")+1;
             diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Quantity_B,Quantity_B,Format_diff_B);
+
             Format_diff_A.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置水平居中
             Format_diff_A.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             Format_diff_A.setBorderStyle(QXlsx::Format::BorderThin);      // 设置边框
-
             rich_diffA->addFragment("",Format_diff_A);
 
             Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置水平居中
