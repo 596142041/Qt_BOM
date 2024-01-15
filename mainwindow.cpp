@@ -56,11 +56,11 @@ QString MainWindow::Read_colum(const QString Name)
     QString lsit_mpn;
     for (int i = 2; i < row; i++)
     {
-            QXlsx::Cell *cell = workSheet->cellAt(i, 5);    // 读取单元格
-            if (cell)
-            {
-                lsit_mpn.append (cell->value().toString().trimmed()+',');
-            }
+        QXlsx::Cell *cell = workSheet->cellAt(i, 5);    // 读取单元格
+        if (cell)
+        {
+            lsit_mpn.append (cell->value().toString().trimmed()+',');
+        }
     }
     return lsit_mpn;
 }
@@ -77,11 +77,11 @@ QString MainWindow::Read_colum(const QString Name)
     //遍历MPN1
     for (int i = start_row; i < row; i++)
     {
-            QXlsx::Cell *cell = workSheet->cellAt(i, column);    // 读取单元格
-            if (cell)
-            {
-                ret.append (cell->value().toString().trimmed().replace(QString(","), QString("/"))+',');
-            }
+        QXlsx::Cell *cell = workSheet->cellAt(i, column);    // 读取单元格
+        if (cell)
+        {
+            ret.append (cell->value().toString().trimmed().replace(QString(","), QString("/"))+',');
+        }
     }
     return ret;
 }
@@ -98,20 +98,19 @@ QStringList MainWindow::Read_colum_List(const QString File_Name,int start_row,in
     //遍历MPN1
     for (int i = start_row; i < row+1; i++)
     {
-            QXlsx::Cell *cell = workSheet->cellAt(i, column);    // 读取MPN单元格
-            if (cell)
+        QXlsx::Cell *cell = workSheet->cellAt(i, column);    // 读取MPN单元格
+        if (cell)
+        {
+            if(cell->value().toString().trimmed() != 0)
             {
-                if(cell->value().toString().trimmed() != 0)
-                {
-                    ret.append (cell->value().toString().trimmed());
-                }
-                else
-                {
-                    cell = workSheet->cellAt(i, column+Excel_Column_INDEX::Column_OFFSET);    // 读取MPN1_Column单元格
-                    ret.append (cell->value().toString().trimmed());
-                }
-
+                ret.append (cell->value().toString().trimmed());
             }
+            else
+            {
+                cell = workSheet->cellAt(i, column+Excel_Column_INDEX::Column_OFFSET);    // 读取MPN1_Column单元格
+                ret.append (cell->value().toString().trimmed());
+            }
+        }
     }
     return ret;
 }
@@ -174,12 +173,11 @@ int MainWindow::Get_Row(const QString File_Name,const QString str,int column)
         QXlsx::Cell *cell = workSheet->cellAt(i, column);    // 读取单元格
         if (cell)
         {
-
-                if(str.compare (cell->value().toString().trimmed(),Qt::CaseSensitive) == 0)
-                {
-                    ret = i;
-                    break;
-                }
+            if(str.compare (cell->value().toString().trimmed(),Qt::CaseSensitive) == 0)
+            {
+                ret = i;
+                break;
+            }
         }
     }
     return ret;
@@ -187,11 +185,7 @@ int MainWindow::Get_Row(const QString File_Name,const QString str,int column)
 void MainWindow::on_pushButton_open_clicked()
 {
     QString path = json->Json_Get_KeyValue("config.json","变更后文件路径");
-    qDebug()<<"File_Name_New path"<<path;
-    File_Name_New = QFileDialog::getOpenFileName(this,
-                                                 tr("Open files"),
-                                                 path,
-                                                 "Excel97(*.xlsx);;Excel(*.xls)");
+    File_Name_New =QFileDialog::getOpenFileName(this,tr("Open files"),path,"Excel97(*.xlsx);;Excel(*.xls)");
     if(File_Name_New.isNull())
     {
             return;
@@ -203,17 +197,12 @@ void MainWindow::on_pushButton_open_clicked()
 void MainWindow::on_pushButton_open_old_clicked()
 {
     QString path = json->Json_Get_KeyValue("config.json","变更前文件路径");
-//    qDebug()<<"File_Name_Old path"<<path;
-    File_Name_Old = QFileDialog::getOpenFileName(this,
-                                                 tr("Open files"),
-                                                 path,
-                                                 "Excel97(*.xlsx);;Excel(*.xls)");
+    File_Name_Old = QFileDialog::getOpenFileName(this,tr("Open files"),path,"Excel97(*.xlsx);;Excel(*.xls)");
     if(File_Name_Old.isNull())
     {
-            return;
+        return;
     }
     QFileInfo fileInfo(File_Name_Old);
-//    qDebug()<<"File_Name_Old path:"<<fileInfo.path();
     json->Json_Set_KeyValue("config.json","变更前文件路径",fileInfo.absoluteFilePath ());
     ui->lineEdit_FileName_old->setText (fileInfo.fileName ());
 }
@@ -229,9 +218,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     //-------------保存不同项目----------
     QFileInfo File_Info;
     File_Info.setFile (File_Name_New);
-//    qDebug()<<"File_Name_New.path()"<<File_Info.path();
     QString diff_name =QDateTime::currentDateTime().toString("_变更记录-MMdd_hms").append (".xlsx").prepend(File_Info.path()+"/"+File_Info.baseName ());
-//    qDebug()<<"diff_name:"<<diff_name;
     QXlsx::Document diff_xlsx(diff_name);//用于保存不同项
     diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_A, COLUMN_With::Model_Name_With);
     diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_B, COLUMN_With::Model_Name_With);
@@ -257,7 +244,6 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     Format_same.setFontBold(false);       // 设置加粗
     Format_same.setFontSize(12);         // 设置字体大小
     Format_same.setFontItalic(false);     // 设置倾斜
-
 
     Format_cell.setBorderStyle (QXlsx::Format::BorderThin);
     Format_cell.setHorizontalAlignment(QXlsx::Format::AlignLeft);// 设置水平左对齐
@@ -327,12 +313,12 @@ void MainWindow::on_pushButton_open_cmp_clicked()
 #if 0
     foreach (const QString& filename, same_list)//遍历
     {
-            //获取每一个所在的行;
-            int row_A = Get_Row(File_Name_New,filename,Excel_Column_INDEX::MPN_Column);
-            int row_B = Get_Row(File_Name_Old,filename,Excel_Column_INDEX::MPN_Column);
-            int MPN_A = mpnA_list.indexOf(filename)+2;
-            int MPN_B = mpnB_list.indexOf(filename)+2;
-            qDebug()<<"MPN,"<<filename<<",row_A:,"<<row_A<<",MPN_A,"<<MPN_A<<",row_B:,"<<row_B<<",MPN_B,"<<MPN_B;
+        //获取每一个所在的行;
+        int row_A = Get_Row(File_Name_New,filename,Excel_Column_INDEX::MPN_Column);
+        int row_B = Get_Row(File_Name_Old,filename,Excel_Column_INDEX::MPN_Column);
+        int MPN_A = mpnA_list.indexOf(filename)+2;
+        int MPN_B = mpnB_list.indexOf(filename)+2;
+        qDebug()<<"MPN,"<<filename<<",row_A:,"<<row_A<<",MPN_A,"<<MPN_A<<",row_B:,"<<row_B<<",MPN_B,"<<MPN_B;
     }
 #endif
     QString Read_cell_A;
@@ -522,70 +508,69 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     dis_start = diff_row;
     foreach (const QString& filename, diffA_list)//遍历
     {
-            int new_diff_row = mpnA_list.indexOf(filename)+2;
-            Factory_Cell = Read_cell(File_Name_New,new_diff_row,Excel_Column_INDEX::Factory_Column);//厂家
-            if(Factory_Cell.length () == 1)
-            {
-                Factory_Cell = Read_cell(File_Name_New,new_diff_row,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET);//厂家
-            }
-            Read_cell_A = Read_cell(File_Name_New,new_diff_row,Point_Column);
-            Read_cell_A.remove (Read_cell_A.size ()-1,1);
-            Factory_Cell.remove (Factory_Cell.size ()-1,1);//移除多余的 ","
-            //旧版本BOM不同部分颜色
-            Format_diff_B.setFontColor (QColor(0, 176, 240));
-            Format_diff_B.setFontBold(true);       // 设置加粗
-            Format_diff_B.setFontSize(12);         // 设置字体大小
-            Format_diff_B.setFontItalic(false);     // 设置倾斜
-            Format_diff_B.setFontName("宋体");      // 设置字体
-            //新版BOM不同部分颜色
-            Format_diff_A.setFontColor (Qt::red);
-            Format_diff_A.setFontBold(true);       // 设置加粗
-            Format_diff_A.setFontSize(12);         // 设置字体大小
-            Format_diff_A.setFontItalic(false);     // 设置倾斜
-            Format_diff_A.setFontName("宋体");      // 设置字体
+        int new_diff_row = mpnA_list.indexOf(filename)+2;
+        Factory_Cell = Read_cell(File_Name_New,new_diff_row,Excel_Column_INDEX::Factory_Column);//厂家
+        if(Factory_Cell.length () == 1)
+        {
+            Factory_Cell = Read_cell(File_Name_New,new_diff_row,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET);//厂家
+        }
+        Read_cell_A = Read_cell(File_Name_New,new_diff_row,Point_Column);
+        Read_cell_A.remove (Read_cell_A.size ()-1,1);
+        Factory_Cell.remove (Factory_Cell.size ()-1,1);//移除多余的 ","
+        //旧版本BOM不同部分颜色
+        Format_diff_B.setFontColor (QColor(0, 176, 240));
+        Format_diff_B.setFontBold(true);       // 设置加粗
+        Format_diff_B.setFontSize(12);         // 设置字体大小
+        Format_diff_B.setFontItalic(false);     // 设置倾斜
+        Format_diff_B.setFontName("宋体");      // 设置字体
+        //新版BOM不同部分颜色
+        Format_diff_A.setFontColor (Qt::red);
+        Format_diff_A.setFontBold(true);       // 设置加粗
+        Format_diff_A.setFontSize(12);         // 设置字体大小
+        Format_diff_A.setFontItalic(false);     // 设置倾斜
+        Format_diff_A.setFontName("宋体");      // 设置字体
 
+        Format_diff_A.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
+        Format_diff_A.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
+        Format_diff_A.setBorderStyle(QXlsx::Format::BorderThin);      // 设置边框
 
-            Format_diff_A.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
-            Format_diff_A.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
-            Format_diff_A.setBorderStyle(QXlsx::Format::BorderThin);      // 设置边框
+        Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
+        Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
+        Format_diff_B.setBorderStyle(QXlsx::Format::BorderThin);      // 设置边框
+        //型号写入
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Model_Name_A,filename,Format_diff_A);
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Model_Name_B,filename,Format_diff_B);
 
-            Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
-            Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
-            Format_diff_B.setBorderStyle(QXlsx::Format::BorderThin);      // 设置边框
-            //型号写入
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Model_Name_A,filename,Format_diff_A);
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Model_Name_B,filename,Format_diff_B);
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Factory_A,Factory_Cell,Format_diff_A);//写入厂家
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Factory_B,Factory_Cell,Format_diff_B);//写入厂家
+        //写入数量
+        int Quantity_A = Read_cell_A.count (",")+1;
+        int Quantity_B = 0;
 
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Factory_A,Factory_Cell,Format_diff_A);//写入厂家
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Factory_B,Factory_Cell,Format_diff_B);//写入厂家
-            //写入数量
-            int Quantity_A = Read_cell_A.count (",")+1;
-            int Quantity_B = 0;
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Quantity_A,Quantity_A,Format_diff_A);
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Quantity_B,Quantity_B,Format_diff_B);
+        //---------------写入位号----------------
+        QXlsx::RichString *rich_diffA = new QXlsx::RichString();
+        QXlsx::RichString *rich_diffB = new QXlsx::RichString();
 
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Quantity_A,Quantity_A,Format_diff_A);
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Quantity_B,Quantity_B,Format_diff_B);
-            //---------------写入位号----------------
-            QXlsx::RichString *rich_diffA = new QXlsx::RichString();
-            QXlsx::RichString *rich_diffB = new QXlsx::RichString();
+        Format_diff_A.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置水平居中
+        rich_diffA->addFragment(Read_cell_A,Format_diff_A);//.replace(QString(","), QString(", "))
 
-            Format_diff_A.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置水平居中
-            rich_diffA->addFragment(Read_cell_A,Format_diff_A);//.replace(QString(","), QString(", "))
+        Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置水平居中
+        rich_diffB->addFragment ("",Format_diff_B);
 
-            Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置水平居中
-            rich_diffB->addFragment ("",Format_diff_B);
-
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Point_A,*rich_diffA);
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Point_B,*rich_diffB);
-            //写入描述信息
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
-            diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
-            delete rich_diffB;
-            delete rich_diffA;
-            diff_row++;
-            pros_cnt++;
-            ui->progressBar->setValue (pros_cnt);
-            dis_diffA_list->append (Read_cell_A.remove(QRegExp("\\s")));
-            dis_diffA_Factory_list->append (Factory_Cell);
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Point_A,*rich_diffA);
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Point_B,*rich_diffB);
+        //写入描述信息
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
+        diff_xlsx.write (diff_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
+        delete rich_diffB;
+        delete rich_diffA;
+        diff_row++;
+        pros_cnt++;
+        ui->progressBar->setValue (pros_cnt);
+        dis_diffA_list->append (Read_cell_A.remove(QRegExp("\\s")));
+        dis_diffA_Factory_list->append (Factory_Cell);
     }
     //遍历B中不同项目
     foreach (const QString& filename, diffB_list)//遍历
@@ -729,10 +714,10 @@ void MainWindow::on_pushButton_tst_clicked()
 {
     Excel_update();
     //json->Json_update ("config.json");
-// QString path = json->Json_Get_KeyValue("config.json","After_file_history").replace("\\","/");
-// qDebug()<<"path:"<<path;
-//    QStringList mpnA_list = Read_colum_List (File_Name_New,2,Excel_Column_INDEX::MPN_Column);
-//    qDebug()<<"\n mpnA_list"<<mpnA_list<<"\n";
+    //QString path = json->Json_Get_KeyValue("config.json","After_file_history").replace("\\","/");
+    //qDebug()<<"path:"<<path;
+    //QStringList mpnA_list = Read_colum_List (File_Name_New,2,Excel_Column_INDEX::MPN_Column);
+    //qDebug()<<"\n mpnA_list"<<mpnA_list<<"\n";
 #if 0
 //    QString list_A =  Read_cell(File_Name_New,46,Excel_Column_INDEX::Point_Column);//.remove(QRegExp("\\s"));//位号A
 //    QString list_B =  Read_cell(File_Name_New,100,Excel_Column_INDEX::Point_Column);//.remove(QRegExp("\\s"));//位号A;
