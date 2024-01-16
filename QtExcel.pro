@@ -1,4 +1,4 @@
-QT       += core gui xlsx
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -7,7 +7,7 @@ TARGET = Qt_BOM
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
+include(xlsx/qtxlsx.pri)
 DEFINES += QT_DEPRECATED_WARNINGS   #定义编译选项。QT_DEPRECATED_WARNINGS表示当Qt的某些功能被标记为过时的，那么编译器会发出警告
 SOURCES += \
     json_resolve.cpp \
