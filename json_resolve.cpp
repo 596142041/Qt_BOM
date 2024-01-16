@@ -83,6 +83,33 @@ void Json_resolve::Json_Set_KeyValue(const QString File_Name,const QString key,c
     wirteStream << root_document.toJson();		// 写入文件
     writeFile.close();					// 关闭文件
 }
+bool Json_resolve::Json_Get_Bool(const QString File_Name,const QString key)
+{
+    bool ret;
+    QFile file_json(File_Name);
+    if(file_json.open (QFile::ReadOnly | QFile::Text) == false)
+    {
+        qDebug()<<"文件错误";
+        return 0;
+    }
+    //读取所有内容
+    QTextStream stream(&file_json);
+    stream.setCodec("UTF-8");		// 设置读取编码是UTF8
+
+    QString str_all = stream.readAll();
+    file_json.close();
+    // 字符串格式化为JSON
+    QJsonParseError json_err;
+    QJsonDocument  root_document = QJsonDocument::fromJson(str_all.toUtf8(), &json_err);
+    if(json_err.error != QJsonParseError::NoError )//文件转换错误
+    {
+        qDebug()<<"错误类型:"<<json_err.errorString ();
+    }
+    // 获取到Json字符串的根节点
+    QJsonObject root_object = root_document.object();//根节点
+    ret = root_object.find(key).value().toBool();
+    return ret;
+}
 QString Json_resolve::Json_Get_KeyValue(const QString File_Name,const QString key)
 {
     QString ret;
@@ -90,7 +117,7 @@ QString Json_resolve::Json_Get_KeyValue(const QString File_Name,const QString ke
     if(file_json.open (QFile::ReadOnly | QFile::Text) == false)
     {
         qDebug()<<"文件错误";
-
+        return 0;
     }
     //读取所有内容
     QTextStream stream(&file_json);

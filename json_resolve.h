@@ -67,6 +67,7 @@ public:
     void Json_Resolve(const QString file_name);
     void Json_Set_KeyValue(const QString File_Name,const QString key,const QString value);
     QString Json_Get_KeyValue(const QString File_Name,const QString key);
+    bool Json_Get_Bool(const QString File_Name,const QString key);
     void Json_update(const QString File_Name);
     BOM_Column BOM_excel_column;
     Write_Column_Width Wirte_Column_width;
