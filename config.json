@@ -1,6 +1,10 @@
 {
-    "Befor_file_history": "P:/Project/Qt_prj/QtExcel/build-QtExcel-Desktop_Qt_5_15_2_MSVC2019_64bit-Release/SE250H_REV2_BOM.xlsx",
-    "Write_Column_Width": {
+    "变更前文件路径": "E:/金康/临时文件/最终给供应商的定点BOM/SE210-C01-20231122.xlsx",
+    "变更后文件路径": "E:/金康/临时文件/最终给供应商的定点BOM/SE150B_SPAK_RH850_REV3_1-12-24.BOM.xlsx",
+    "日志记录使能": true,
+    "比较结果文件路径": "E:/金康/临时文件/最终给供应商的定点BOM/SE150B_SPAK_RH850_REV3_1-12-24_变更记录-0116_22581.xlsx",
+    "Write_Column_Width": 
+    {
         "Change_type_With": 16,
         "Description_With": 20,
         "Factory_With": 17,
@@ -8,7 +12,8 @@
         "Point_With": 90,
         "Quantity_With": 9
     },
-    "BOM_Column": {
+    "BOM_Column": 
+    {
         "Column_OFFSET": 2,
         "Factory1_Column": 8,
         "Factory_Column": 6,
