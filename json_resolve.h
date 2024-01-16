@@ -50,7 +50,6 @@ typedef struct _BOM_Column
     int MPN_Column;
     int Factory_Column;
     int Factory1_Column;
-
 }BOM_Column;
 typedef struct _Write_Column_Width {
     int MPN_width;
