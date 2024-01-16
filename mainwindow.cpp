@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     cell_Item = new QTableWidgetItem;
     Write_xlsx = new QXlsx::Document;
     ui->setupUi(this);
-     setWindowFlags(Qt::WindowMinimizeButtonHint|Qt::WindowCloseButtonHint); // 设置禁止最大化
+    setWindowFlags(Qt::WindowMinimizeButtonHint|Qt::WindowCloseButtonHint); // 设置禁止最大化
     // 每次选中一个单元格
     ui->tableWidgetdiff->setSelectionBehavior(QAbstractItemView::SelectItems);
 
@@ -29,7 +29,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableWidgetdiff->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->progressBar->setValue (0);
     ui->progressBar->setAlignment (Qt::AlignCenter);
-    ui->pushButton_tst->setEnabled (false);
+    if(tst_btn_enable == true)
+    {
+        ui->pushButton_tst->setEnabled (true);
+    }
+    else
+    {
+        ui->pushButton_tst->setEnabled (false);
+    }
+
     ui->lineEdit_savepath->setReadOnly (true);
 }
 
@@ -211,9 +219,14 @@ void MainWindow::on_pushButton_open_old_clicked()
 */
 void MainWindow::on_pushButton_open_cmp_clicked()
 {
+    log_enable = json->Json_Get_Bool("config.json","日志记录使能");
+    if(log_enable == true)
+    {
+        LogHandler::Get().installMessageHandler();
+    }
     if(File_Name_New.isNull()||File_Name_Old.isNull())
     {
-            return;
+        return;
     }
     //-------------保存不同项目----------
     QFileInfo File_Info;
@@ -296,12 +309,17 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     //直接使用list来查找不同
     //读取型号列
     QStringList mpnA_list = Read_colum_List (File_Name_New,2,Excel_Column_INDEX::MPN_Column);
+    qDebug()<<"mpnA_list:"<<mpnA_list;
     QStringList mpnB_list = Read_colum_List (File_Name_Old,2,Excel_Column_INDEX::MPN_Column);
+    qDebug()<<"mpnB_list:"<<mpnB_list;
     str_cmp->CMP_set_srtlist (mpnA_list,mpnB_list);
     str_cmp->String_Cmp_list ();
     QStringList same_list = str_cmp->same_strlist;
+    qDebug()<<"same_list:"<<same_list;
     QStringList diffA_list = str_cmp->diffA_list;
+    qDebug()<<"diffA_list:"<<diffA_list;
     QStringList diffB_list = str_cmp->diffB_list;
+    qDebug()<<"diffB_list:"<<diffB_list;
     //distinguish
     QStringList *dis_diffA_list  = new QStringList;
     QStringList *dis_diffA_Factory_list  = new QStringList;
@@ -708,14 +726,20 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     json->Json_Set_KeyValue("config.json","比较结果文件路径",diff_name);
     delete dis_diffA_list;
     delete dis_diffA_Factory_list;
+    if(log_enable == true)
+    {
+        //[4] 程序结束时释放 LogHandler 的资源，例如刷新并关闭日志文件
+        LogHandler::Get().uninstallMessageHandler();
+    }
+
 }
 
 void MainWindow::on_pushButton_tst_clicked()
 {
-    Excel_update();
+    //Excel_update();
     //json->Json_update ("config.json");
-    //QString path = json->Json_Get_KeyValue("config.json","After_file_history").replace("\\","/");
-    //qDebug()<<"path:"<<path;
+    bool status = json->Json_Get_Bool("config.json","日志记录使能");
+    qDebug()<<"status:"<<status;
     //QStringList mpnA_list = Read_colum_List (File_Name_New,2,Excel_Column_INDEX::MPN_Column);
     //qDebug()<<"\n mpnA_list"<<mpnA_list<<"\n";
 #if 0

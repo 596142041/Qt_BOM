@@ -34,6 +34,8 @@
 #include "qstring_cmp.h"
 
 #include "json_resolve.h"
+
+#include "LogHandler.h"
 //---------------------
 typedef enum _COLUMN_HEAD_INDEX {
     Model_Name_B    = 1,
@@ -103,5 +105,7 @@ private:
     void Excel_update();
     QXlsx::Document *Write_xlsx;
     QString Write_xlsx_name;
+    bool tst_btn_enable = false;
+    bool log_enable = false;
 };
 #endif // MAINWINDOW_H
