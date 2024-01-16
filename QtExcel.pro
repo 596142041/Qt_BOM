@@ -10,12 +10,14 @@ TARGET = Qt_BOM
 include(xlsx/qtxlsx.pri)
 DEFINES += QT_DEPRECATED_WARNINGS   #定义编译选项。QT_DEPRECATED_WARNINGS表示当Qt的某些功能被标记为过时的，那么编译器会发出警告
 SOURCES += \
+    LogHandler.cpp \
     json_resolve.cpp \
     main.cpp \
     mainwindow.cpp \
     qstring_cmp.cpp
 
 HEADERS += \
+    LogHandler.h \
     json_resolve.h \
     mainwindow.h \
     qstring_cmp.h
