@@ -12,11 +12,10 @@ void Qstring_cmp::CMP_set_srting(const QString str_cmpA,const QString str_cmpB)
 }
 void Qstring_cmp::String_Cmp()
 {
-    //QString repeat_string = ui->textEdit_repeatrm->toPlainText().toUpper().replace(QString("\n"), QString(",")).remove(QRegExp("\\s"));
-    QString string_all = cmpA.replace(QString("\n"), QString(","));//.remove(QRegExp("\\s"));
-    QString  stringA   = cmpA.replace(QString("\n"), QString(","));//.remove(QRegExp("\\s"));
-    QString  stringB   = cmpB.replace(QString("\n"), QString(","));//.remove(QRegExp("\\s"));
-    /*---------------------------------------------------------------------------------------------------------------------------------*/
+    QString string_all = cmpA.replace(QString("\n"), QString(","));
+    QString  stringA   = cmpA.replace(QString("\n"), QString(","));
+    QString  stringB   = cmpB.replace(QString("\n"), QString(","));
+    /*--------------------------------------------------------------------*/
     QStringList listA = stringA.split(QLatin1Char(','), Qt::SkipEmptyParts);
     QStringList listB = stringB.split(QLatin1Char(','), Qt::SkipEmptyParts);
     string_all = string_all.append(',');
@@ -26,8 +25,7 @@ void Qstring_cmp::String_Cmp()
     QStringList distin_same;//表示重复项
     QString  string_outA;
     QString  string_outB;
-//    QCollator collator;
-    /*
+/*
 思路是把list中的每一个都用来比较，如果当前的值在distin_diff不存在就把该值加入distin_diff,如果存在说明该值就是重复项
 */
     foreach (const QString& filename, list_all)//遍历
@@ -42,7 +40,6 @@ void Qstring_cmp::String_Cmp()
             {
                 distin_same.append(filename);
             }
-
         }
     }
     foreach (const QString& filename, distin_same)//遍历
