@@ -1,20 +1,7 @@
 {
-    "变更前文件路径": "E:/金康/临时文件/最终给供应商的定点BOM/SE210-C01-20231122.xlsx",
-    "变更后文件路径": "E:/金康/临时文件/最终给供应商的定点BOM/SE150B_SPAK_RH850_REV3_1-12-24.BOM.xlsx",
-    "日志记录使能": true,
-    "比较结果文件路径": "E:/金康/临时文件/最终给供应商的定点BOM/SE150B_SPAK_RH850_REV3_1-12-24_变更记录-0116_22581.xlsx",
-    "Write_Column_Width": 
-    {
-        "Change_type_With": 16,
-        "Description_With": 20,
-        "Factory_With": 17,
-        "Model_Name_With": 30,
-        "Point_With": 90,
-        "Quantity_With": 9
-    },
-    "BOM_Column": 
-    {
+    "BOM_Column": {
         "Column_OFFSET": 2,
+        "Description": "表示当前BOM表中对应的列",
         "Factory1_Column": 8,
         "Factory_Column": 6,
         "MPN1_Column": 7,
@@ -22,20 +9,39 @@
         "Point_Column": 4,
         "Quantity_Column": 3
     },
+    "Write_Column_Width": {
+        "Change_type_Width": 16,
+        "Date_Width": 17,
+        "Description": "表示写入的对比表格中的列的宽度",
+        "Description_Width": 11,
+        "Factory_With": 17,
+        "Indx_Width": 8,
+        "Model_Name_Width": 30,
+        "Point_Width": 90,
+        "Quantity_Width": 7
+    },
     "Write_HEAD_INDEX": {
-        "Change_type": 11,
-        "Description_A": 8,
-        "Description_B": 3,
-        "Factory_A": 7,
-        "Factory_B": 2,
-        "Model_Name_A": 6,
-        "Model_Name_B": 1,
-        "Point_A": 9,
-        "Point_B": 4,
-        "Quantity_A": 10,
-        "Quantity_B": 5
+        "Change_date": 1,
+        "Change_type": 13,
+        "Description_A": 10,
+        "Description_B": 5,
+        "Factory_A": 9,
+        "Factory_B": 4,
+        "Indx_cnt": 2,
+        "Model_Name_A": 8,
+        "Model_Name_B": 3,
+        "Point_A": 11,
+        "Point_B": 6,
+        "Quantity_A": 12,
+        "Quantity_B": 7
     },
     "blog": "https: //www.cnblogs.com/lyshark",
     "enable": true,
-    "status": false
+    "status": false,
+    "test_status": 6,
+    "变更前文件路径": "E:/金康/SE BOM汇总/C01-1220/SE150H-C01-20231122.xlsx",
+    "变更后文件路径": "E:/金康/SE BOM汇总/C02-0205/SE150H-C02-20240205.xlsx",
+    "日志记录使能": true,
+    "比较结果文件路径": "E:/金康/SE BOM汇总/C02-0205/SE150H-C02-20240205_变更记录-0227_203814.xlsx",
+    "测试按钮使能": true
 }
