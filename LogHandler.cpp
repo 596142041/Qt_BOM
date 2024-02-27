@@ -36,7 +36,6 @@ LogHandlerPrivate::LogHandlerPrivate() {
     flushLogFileTimer.setInterval(1000); // TODO: 可从配置文件读取
     flushLogFileTimer.start();
     QObject::connect(&flushLogFileTimer, &QTimer::timeout, [] {
-        // qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"); // 测试不停的写入内容到日志文件
         QMutexLocker locker(&LogHandlerPrivate::logMutex);
         if (nullptr != logOut)
         {
@@ -107,24 +106,26 @@ void LogHandlerPrivate::openAndBackupLogFile() {
 }
 
 // 检测当前日志文件大小
-void LogHandlerPrivate::checkLogFiles() {
+void LogHandlerPrivate::checkLogFiles()
+{
     // 如果 protocal.log 文件大小超过5M，重新创建一个日志文件，原文件存档为yyyy-MM-dd_hhmmss.log
-    if (logFile->size() > 1024*g_logLimitSize) {
+    if (logFile->size() > 1024*g_logLimitSize)
+    {
         logFile->flush();
         logFile->close();
         delete logOut;
         delete logFile;
-
         QString logPath = logDir.absoluteFilePath("today.log"); // 日志的路径
         QString newLogPath = logDir.absoluteFilePath(logFileCreatedDate.toString("yyyy-MM-dd.log"));
         QFile::copy(logPath, newLogPath); // Bug: 按理说 rename 会更合适，但是 rename 时最后一个文件总是显示不出来，需要 killall Finder 后才出现
         QFile::remove(logPath); // 删除重新创建，改变创建时间
-
         logFile = new QFile(logPath);
         logOut  = (logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) ?  new QTextStream(logFile) : NULL;
         logFileCreatedDate = QDate::currentDate();
         if (logOut != nullptr)
+        {
             logOut->setCodec("UTF-8");
+        }
     }
 }
 
@@ -194,12 +195,10 @@ void LogHandlerPrivate::messageHandler(QtMsgType type, const QMessageLogContext 
 
     // 输出到日志文件, 格式: 时间 - [Level] (文件名:行数, 函数): 消息
     QString fileName = context.file;
+    QString time_str = QDateTime::currentDateTime().toString("yyyy年MM月dd日 hh:mm:ss");
     int index = fileName.lastIndexOf(QDir::separator());
     fileName = fileName.mid(index + 1);
-
-    (*LogHandlerPrivate::logOut) << QString("%1 - [%2] (%3:%4, %5): %6\n")
-                                    .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(level)
-                                    .arg(fileName).arg(context.line).arg(context.function).arg(msg);
+    (*LogHandlerPrivate::logOut) << QString("%1-[%2]-(%3:%4,%5): %6\n").arg(time_str).arg(level).arg(fileName).arg(context.line).arg(context.function).arg(msg);
 }
 
 /************************************************************************************************************
