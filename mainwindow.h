@@ -86,6 +86,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    QStringList Read_colum(QXlsx::Document *pDocument,int start_row,int column);
     QStringList Read_colum_List(const QString File_Name,int start_row,int column);
 private slots:
     void on_pushButton_open_clicked();
@@ -95,15 +96,16 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    void Excel_update();
     QString File_Name_New;
     QString File_Name_Old;
+    QString Write_xlsx_name;
     Qstring_cmp *str_cmp;
     QTableWidgetItem *cell_Item;
     Json_resolve *json;
-    void Excel_update();
-    QString Write_xlsx_name;
     bool tst_btn_enable;
     bool log_enable;
+    bool default_open;
     int write_row;
     QXlsx::Document *Write_xlsx;
     QXlsx::Document *Read_New_BOM;
