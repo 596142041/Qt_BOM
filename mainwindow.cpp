@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#ifdef _WIN32
+#include <windows.h>
+#endif
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -35,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     write_row = 1;
     tst_btn_enable = json->Json_Get_Bool(CONFIG_NAME,"测试按钮使能");
     log_enable = json->Json_Get_Bool(CONFIG_NAME,"日志记录使能");
-
+    default_open = false;
     if(tst_btn_enable == true)
     {
         ui->pushButton_tst->setEnabled (true);
@@ -62,6 +64,25 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QStringList MainWindow::Read_colum(QXlsx::Document *pDocument,int start_row,int column)
+{
+    QStringList ret;
+    int row = pDocument->dimension().rowCount();
+    for (int i = start_row; i < row+1; i++)
+    {
+        if(pDocument->cellAt(i,column)->value().toString().trimmed() !=0)
+        {
+            ret.append(pDocument->cellAt(i,column)->value().toString().trimmed());
+        }
+        else
+        {
+            ret.append(pDocument->cellAt(i,column+Excel_Column_INDEX::Column_OFFSET)->value().toString().trimmed());
+        }
+    }
+    qDebug()<<"列如下:\n"<<ret;
+    return ret;
+}
+
 QStringList MainWindow::Read_colum_List(const QString File_Name,int start_row,int column)
 {
     QStringList ret;
@@ -71,7 +92,7 @@ QStringList MainWindow::Read_colum_List(const QString File_Name,int start_row,in
     // 获取当前工作簿的第一张sheet工作表
     QXlsx::Worksheet *workSheet = static_cast<QXlsx::Worksheet*>(workBook->sheet(0));
     // 获取当前sheet表所使用到的行数
-//    xlsx.dimension ().rowCount ();
+    //    xlsx.dimension ().rowCount ();
     //dimension
     int row = workSheet->dimension().rowCount();
     //遍历MPN1
@@ -176,7 +197,6 @@ void MainWindow::Excel_update()
     Write_xlsx->saveAs (Write_xlsx_name);
 }
 
-
 void MainWindow::on_pushButton_open_clicked()
 {
     QString path = json->Json_Get_KeyValue(CONFIG_NAME,"变更后文件路径");
@@ -189,6 +209,7 @@ void MainWindow::on_pushButton_open_clicked()
     json->Json_Set_KeyValue(CONFIG_NAME,"变更后文件路径",fileInfo.absoluteFilePath ());
     ui->lineEdit_FileName->setText (fileInfo.fileName ());
 }
+
 void MainWindow::on_pushButton_open_old_clicked()
 {
     QString path = json->Json_Get_KeyValue(CONFIG_NAME,"变更前文件路径");
@@ -327,8 +348,12 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     //------------------------------------------------
     //直接使用list来查找不同
     //读取型号列
-    QStringList mpnA_list = Read_colum_List (File_Name_New,2,Excel_Column_INDEX::MPN_Column);
-    QStringList mpnB_list = Read_colum_List (File_Name_Old,2,Excel_Column_INDEX::MPN_Column);
+    QStringList mpnA_list,mpnB_list;
+    //Read_colum Read_New_BOM Read_Old_BOM
+//    mpnA_list = Read_colum (Read_New_BOM,2,Excel_Column_INDEX::MPN_Column);
+//    mpnB_list = Read_colum (Read_Old_BOM,2,Excel_Column_INDEX::MPN_Column);
+    mpnA_list = Read_colum_List (File_Name_New,2,Excel_Column_INDEX::MPN_Column);
+    mpnB_list = Read_colum_List (File_Name_Old,2,Excel_Column_INDEX::MPN_Column);
     str_cmp->CMP_set_srtlist (mpnA_list,mpnB_list);
     str_cmp->String_Cmp_list ();
     QStringList same_list = str_cmp->same_strlist;
@@ -591,16 +616,11 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         QXlsx::RichString *rich_diffB = new QXlsx::RichString();
         int old_diff_row = mpnB_list.indexOf(filename)+2;
         Read_cell_B = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"));
-//        Read_cell_B = Read_cell(File_Name_Old,old_diff_row,Point_Column);
-//        Read_cell_B.remove (Read_cell_B.size ()-1,1);
-//        Factory_Cell = Read_cell(File_Name_Old,old_diff_row,Excel_Column_INDEX::Factory_Column);//厂家
         Factory_Cell = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Factory_Column)->value().toString().trimmed().toUpper();
         if(Factory_Cell.length () == 1)
         {
-//            Factory_Cell = Read_cell(File_Name_Old,old_diff_row,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET);//厂家
             Factory_Cell = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET)->value().toString().trimmed().toUpper();
         }
-//        Factory_Cell.remove (Factory_Cell.size ()-1,1);//移除多余的 ","
 
         dis_cnt = dis_diffA_list->indexOf (Read_cell_B.remove(QRegExp("\\s")));
         int flag =dis_cnt+1;//为0即为新增物料和位号,非0即为改变型号,位号无变化
@@ -709,6 +729,12 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     json->Json_Set_KeyValue(CONFIG_NAME,"比较结果文件路径",diff_name);
     //替换文件名中"/"
     diff_name.replace("/","\\");
+    default_open = json->Json_Get_Bool(CONFIG_NAME,"默认文件打开使能");
+    if(default_open == true)//如果使能默认打开文件,比较完成之后直接打开文件,可以通过json文件配置
+    {
+       ShellExecuteW(NULL,QString("open").toStdWString().c_str(),diff_name.toStdWString().c_str(),NULL,NULL,SW_SHOW);
+    }
+
     ui->lineEdit_savepath->setText (diff_name);
     diff_name.clear();
     delete dis_diffA_list;
@@ -717,7 +743,6 @@ void MainWindow::on_pushButton_open_cmp_clicked()
 
 void MainWindow::on_pushButton_tst_clicked()
 {
-
     int test_state = json->Json_Get_Int(CONFIG_NAME,"test_status");
     qDebug()<<"测试项目为:"<<test_state;
     switch (test_state)
