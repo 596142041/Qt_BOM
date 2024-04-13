@@ -3,7 +3,8 @@
 Qstring_cmp::Qstring_cmp(QObject *parent)
     : QObject{parent}
 {
-
+    cmpA.clear ();
+    cmpB.clear ();
 }
 void Qstring_cmp::CMP_set_srting(const QString str_cmpA,const QString str_cmpB)
 {
