@@ -13,6 +13,10 @@ MainWindow::MainWindow(QWidget *parent)
     Write_xlsx = new QXlsx::Document;
     ui->setupUi(this);
     setWindowFlags(Qt::WindowMinimizeButtonHint|Qt::WindowCloseButtonHint); // 设置禁止最大化
+    QSize win = Wind_Info();
+    qDebug()<<"win = "<<win;
+    this->setMinimumSize(win);//设置最小尺寸，数字可以随情况更改
+    this->setMaximumSize(win);//设置最大尺寸，数字可以随情况更改
     // 每次选中一个单元格
     ui->tableWidgetdiff->setSelectionBehavior(QAbstractItemView::SelectItems);
 
@@ -52,6 +56,16 @@ MainWindow::MainWindow(QWidget *parent)
     }
     ui->lineEdit_savepath->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
     ui->lineEdit_savepath->setReadOnly (true);
+    //处理状态栏
+    ui->statusbar->setSizeGripEnabled(false);//去掉状态栏右下角的三角
+    // 新增标签栏
+    QLabel *label_info = new QLabel(this);
+    // 配置显示信息
+    label_info->setFrameStyle(QFrame::Box | QFrame::Sunken);
+    label_info->setText(tr("作者:皇甫仁和,本工具仅限个人使用"));
+    label_info->setOpenExternalLinks(false);
+    // 将信息增加到底部（永久添加）
+    ui->statusbar->addPermanentWidget(label_info);
 }
 
 MainWindow::~MainWindow()
@@ -63,7 +77,23 @@ MainWindow::~MainWindow()
     }
     delete ui;
 }
-
+ QSize MainWindow::Wind_Info()
+{
+    // QSize win(1265,850);
+    int width = 0;
+    int height = 0;
+    width  = json->Json_Get_Int(CONFIG_NAME,"wind_width");
+    height = json->Json_Get_Int(CONFIG_NAME,"wind_height");
+    if(width < 1265)
+    {
+        width = 1265;
+    }
+    if(height < 820)
+    {
+        height = 820;
+    }
+    return QSize(width, height);
+ }
 QStringList MainWindow::Read_colum(QXlsx::Document *pDocument,int start_row,int column)
 {
     QStringList ret;
@@ -92,8 +122,6 @@ QStringList MainWindow::Read_colum_List(const QString File_Name,int start_row,in
     // 获取当前工作簿的第一张sheet工作表
     QXlsx::Worksheet *workSheet = static_cast<QXlsx::Worksheet*>(workBook->sheet(0));
     // 获取当前sheet表所使用到的行数
-    //    xlsx.dimension ().rowCount ();
-    //dimension
     int row = workSheet->dimension().rowCount();
     //遍历MPN1
     for (int i = start_row; i < row+1; i++)
@@ -117,13 +145,6 @@ QStringList MainWindow::Read_colum_List(const QString File_Name,int start_row,in
 
 void MainWindow::Excel_update()
 {
-    //json->Json_update (CONFIG_NAME);
-    /*
-    if(json->BOM_excel_column.Column_OFFSET ==0)
-    {
-        json->BOM_excel_column.Column_OFFSET = Excel_Column_INDEX::Column_OFFSET;
-    }
-*/
     //-------------保存不同项目----------
     QFileInfo File_Info;
     QXlsx::Format format;//仅用于表头的字体格式
@@ -200,7 +221,7 @@ void MainWindow::Excel_update()
 void MainWindow::on_pushButton_open_clicked()
 {
     QString path = json->Json_Get_KeyValue(CONFIG_NAME,"变更后文件路径");
-    File_Name_New =QFileDialog::getOpenFileName(this,tr("Open files"),path,"Excel97(*.xlsx);;Excel(*.xls)");
+    File_Name_New = QFileDialog::getOpenFileName(this,tr("打开新版BOM文件"),path,"Excel工作簿(*.xlsx);;Excel 97-2003工作簿(*.xls)");
     if(File_Name_New.isNull())
     {
         return;
@@ -213,7 +234,7 @@ void MainWindow::on_pushButton_open_clicked()
 void MainWindow::on_pushButton_open_old_clicked()
 {
     QString path = json->Json_Get_KeyValue(CONFIG_NAME,"变更前文件路径");
-    File_Name_Old = QFileDialog::getOpenFileName(this,tr("Open files"),path,"Excel97(*.xlsx);;Excel(*.xls)");
+    File_Name_Old = QFileDialog::getOpenFileName(this,tr("打开旧版BOM文件"),path,"Excel工作簿(*.xlsx);;Excel 97-2003工作簿(*.xls)");
     if(File_Name_Old.isNull())
     {
         return;
@@ -231,6 +252,11 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     if(File_Name_New.isNull()||File_Name_Old.isNull())
     {
         return;
+    }
+    read_start_row = json->Json_Get_Int(CONFIG_NAME,"start_row");
+    if(read_start_row == 0 || read_start_row > 4)
+    {
+        read_start_row = 2;
     }
     Read_New_BOM = new QXlsx::Document(File_Name_New);
     Read_Old_BOM = new QXlsx::Document(File_Name_Old);
@@ -349,11 +375,10 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     //直接使用list来查找不同
     //读取型号列
     QStringList mpnA_list,mpnB_list;
-    //Read_colum Read_New_BOM Read_Old_BOM
-//    mpnA_list = Read_colum (Read_New_BOM,2,Excel_Column_INDEX::MPN_Column);
-//    mpnB_list = Read_colum (Read_Old_BOM,2,Excel_Column_INDEX::MPN_Column);
-    mpnA_list = Read_colum_List (File_Name_New,2,Excel_Column_INDEX::MPN_Column);
-    mpnB_list = Read_colum_List (File_Name_Old,2,Excel_Column_INDEX::MPN_Column);
+    //mpnA_list = Read_colum (Read_New_BOM,2,Excel_Column_INDEX::MPN_Column);
+    //mpnB_list = Read_colum (Read_Old_BOM,2,Excel_Column_INDEX::MPN_Column);
+    mpnA_list = Read_colum_List (File_Name_New,read_start_row,Excel_Column_INDEX::MPN_Column);
+    mpnB_list = Read_colum_List (File_Name_Old,read_start_row,Excel_Column_INDEX::MPN_Column);
     str_cmp->CMP_set_srtlist (mpnA_list,mpnB_list);
     str_cmp->String_Cmp_list ();
     QStringList same_list = str_cmp->same_strlist;
@@ -361,11 +386,9 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     QStringList diffB_list = str_cmp->diffB_list;
     if(log_enable == true)//开启日志记录
     {
-        qDebug()<<"  新版BOM中所有物料型号: \n"<<mpnA_list<<"\n";
-        qDebug()<<"  旧版BOM中所有物料型号: \n"<<mpnB_list<<"\n";
-        qDebug()<<"  相同型号:\n"<<same_list<<"\n";
-        qDebug()<<"  新增型号:\n"<<diffA_list<<"\n";
-        qDebug()<<"  删除的型号:\n"<<diffB_list<<"\n";
+        qInfo()<<"  相同型号:\n"<<same_list<<"\n";
+        qInfo()<<"  新增型号:\n"<<diffA_list<<"\n";
+        qInfo()<<"  删除的型号:\n"<<diffB_list<<"\n";
     }
     QString Change_date_str = QDateTime::currentDateTime().toString("yyyy年MM月dd日");
     QStringList *dis_diffA_list  = new QStringList;
@@ -384,7 +407,6 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     Factory_Cell.clear ();
     Factory_Cell_A.clear ();
     int pros_cnt = 0;//处理进度
-//开始比较
 #if 1
     //先查找相同型号的变更,遍历相同型号的的位号差异
     foreach (const QString& filename, same_list)//遍历
@@ -395,13 +417,13 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         Read_cell_A = Read_New_BOM->cellAt(row_A,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"))+',';
         Read_cell_B = Read_Old_BOM->cellAt(row_B,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"))+',';
         Factory_Cell = Read_Old_BOM->cellAt(row_B,Excel_Column_INDEX::Factory_Column)->value().toString().trimmed().toUpper();
-        if(Factory_Cell.length () == 1)
+        if(Factory_Cell.length () == 1||Factory_Cell.length () == 0)
         {
             Factory_Cell = Read_Old_BOM->cellAt(row_B,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET)->value().toString().trimmed().toUpper();
         }
 
         Factory_Cell_A = Read_New_BOM->cellAt(row_A,Excel_Column_INDEX::Factory_Column)->value().toString().trimmed().toUpper();
-        if(Factory_Cell_A.length () == 1)
+        if(Factory_Cell_A.length () == 1||Factory_Cell_A.length () == 0)
         {
             Factory_Cell_A = Read_New_BOM->cellAt(row_A,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET)->value().toString().trimmed().toUpper();
         }
@@ -409,15 +431,8 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         str_cmp->CMP_set_srting (Read_cell_A,Read_cell_B);
         str_cmp->String_Cmp ();
         // 获得行尾
-        int row_cnt = ui->tableWidgetdiff->rowCount();
         if((str_cmp->diff_A.length()+str_cmp->diff_B.length ()) !=0)
         {
-            // 插入一行
-            ui->tableWidgetdiff->insertRow(row_cnt);
-            ui->tableWidgetdiff->setItem(row_cnt, COLUMN_HEAD_INDEX::Model_Name_A-2, new QTableWidgetItem(filename));
-            ui->tableWidgetdiff->setItem(row_cnt, COLUMN_HEAD_INDEX::Model_Name_B-1, new QTableWidgetItem(filename));
-            ui->tableWidgetdiff->setItem(row_cnt, COLUMN_HEAD_INDEX::Point_A-3, new QTableWidgetItem(str_cmp->same_str+str_cmp->diff_A));
-            ui->tableWidgetdiff->setItem(row_cnt, COLUMN_HEAD_INDEX::Point_B-2, new QTableWidgetItem(str_cmp->same_str+str_cmp->diff_B));
             //相同部分字体颜色
             Format_same.setFontColor (Qt::black);
             Format_same.setFontBold(false);       // 设置加粗
@@ -474,7 +489,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             //写入描述信息和日期
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"",Format_cell);
+            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"数量变更",format);
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,Change_date_str,format);
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Indx_cnt,write_row-2,format);
 
@@ -527,7 +542,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
                 diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_A,Quantity,Format_same);
                 diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_B,Quantity,Format_same);
                 //写入描述信息
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"",Format_cell);
+                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"厂家变更",format);
                 diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
                 diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
                 diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,Change_date_str,format);
@@ -593,7 +608,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_A,*rich_diffA);
         diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_B,*rich_diffB);
         //写入描述信息
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"",Format_cell);
+        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"新增物料",format);
         diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
         diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
         diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,Change_date_str,format);
@@ -615,7 +630,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         QXlsx::RichString *rich_diffA = new QXlsx::RichString();
         QXlsx::RichString *rich_diffB = new QXlsx::RichString();
         int old_diff_row = mpnB_list.indexOf(filename)+2;
-        Read_cell_B = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"));
+        Read_cell_B  = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"));
         Factory_Cell = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Factory_Column)->value().toString().trimmed().toUpper();
         if(Factory_Cell.length () == 1)
         {
@@ -669,7 +684,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_A,*rich_diffA);
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_B,*rich_diffB);
             //写入描述信息
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"",Format_cell);
+            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"删除物料",format);
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
             diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,Change_date_str,format);
@@ -698,7 +713,6 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
             Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             //型号写入
-            //diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Model_Name_A,filename,Format_diff_A);
             diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Model_Name_B,filename,Format_diff_B);
             //写入厂家
             //判断厂家
@@ -717,6 +731,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_same.setHorizontalAlignment(QXlsx::Format::AlignHCenter); //设置左对齐
             diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Quantity_B,Quantity,Format_same);
             diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Quantity_A,Quantity,Format_same);
+            diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Change_type,"更改型号",format);
         }
         delete rich_diffB;
         delete rich_diffA;
@@ -724,17 +739,27 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         ui->progressBar->setValue (pros_cnt);
     }
 #endif
+    //bool setRowHidden(int row, bool hidden);
+    //bool setColumnHidden(int colFirst, int colLast, bool hidden);
+    bool Hidden_status = json->Json_Get_Bool(CONFIG_NAME,"是否隐藏");
+    if(Hidden_status == true)
+    {
+        diff_xlsx.setColumnHidden (COLUMN_HEAD_INDEX::Quantity_A,true);
+        diff_xlsx.setColumnHidden (COLUMN_HEAD_INDEX::Quantity_B,true);
+        diff_xlsx.setColumnHidden (COLUMN_HEAD_INDEX::Description_A,true);
+        diff_xlsx.setColumnHidden (COLUMN_HEAD_INDEX::Description_B,true);
+        diff_xlsx.setColumnHidden(COLUMN_HEAD_INDEX::Change_date,COLUMN_HEAD_INDEX::Indx_cnt,true);
+    }
     diff_xlsx.save();//保存Excel
     write_row = 1;
     json->Json_Set_KeyValue(CONFIG_NAME,"比较结果文件路径",diff_name);
     //替换文件名中"/"
     diff_name.replace("/","\\");
     default_open = json->Json_Get_Bool(CONFIG_NAME,"默认文件打开使能");
-    if(default_open == true)//如果使能默认打开文件,比较完成之后直接打开文件,可以通过json文件配置
+    if(ui->checkBox_Autoopen->checkState ()==Qt::Checked)//如果使能默认打开文件,比较完成之后直接打开文件,可以通过json文件配置
     {
        ShellExecuteW(NULL,QString("open").toStdWString().c_str(),diff_name.toStdWString().c_str(),NULL,NULL,SW_SHOW);
     }
-
     ui->lineEdit_savepath->setText (diff_name);
     diff_name.clear();
     delete dis_diffA_list;
@@ -870,11 +895,83 @@ void MainWindow::on_pushButton_tst_clicked()
             xlsx.save();
         }
         break;
+        case 6:
+        {
+            quint8 key_16[16] =  {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
+            for (int i=0; i<16; i++)
+            key16.append(key_16[i]);
+
+            quint8 key_24[24] = { 0x8e, 0x73, 0xb0, 0xf7, 0xda, 0x0e, 0x64, 0x52, 0xc8, 0x10, 0xf3, 0x2b, 0x80, 0x90, 0x79, 0xe5, 0x62, 0xf8,
+                                 0xea, 0xd2, 0x52, 0x2c, 0x6b, 0x7b};
+            for (int i=0; i<24; i++)
+            key24.append(key_24[i]);
+
+            quint8 key_32[32]= { 0x60, 0x3d, 0xeb, 0x10, 0x15, 0xca, 0x71, 0xbe, 0x2b, 0x73, 0xae, 0xf0, 0x85, 0x7d, 0x77, 0x81,
+                                 0x1f, 0x35, 0x2c, 0x07, 0x3b, 0x61, 0x08, 0xd7, 0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4 };
+            for (int i=0; i<32; i++)
+            key32.append(key_32[i]);
+
+            quint8 iv_16[16]     = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+            for (int i=0; i<16; i++)
+            iv.append(iv_16[i]);
+
+            quint8 in_text[16]    = { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a };
+            quint8 out_text[16]   = { 0x3a, 0xd7, 0x7b, 0xb4, 0x0d, 0x7a, 0x36, 0x60, 0xa8, 0x9e, 0xca, 0xf3, 0x24, 0x66, 0xef, 0x97 };
+            quint8 out_text_2[16] = { 0xbd, 0x33, 0x4f, 0x1d, 0x6e, 0x45, 0xf2, 0x5f, 0xf7, 0x12, 0xa2, 0x14, 0x57, 0x1f, 0xa5, 0xcc };
+            quint8 out_text_3[16] = { 0xf3, 0xee, 0xd1, 0xbd, 0xb5, 0xd2, 0xa0, 0x3c, 0x06, 0x4b, 0x5a, 0x7e, 0x3d, 0xb1, 0x81, 0xf8 };
+            quint8 out_text_4[16] = { 0x3b, 0x3f, 0xd9, 0x2e, 0xb7, 0x2d, 0xad, 0x20, 0x33, 0x34, 0x49, 0xf8, 0xe8, 0x3c, 0xfb, 0x4a };
+
+            for (int i=0; i<16; i++)
+            {
+            in.append(in_text[i]);
+            outECB128.append(out_text[i]);
+            outECB192.append(out_text_2[i]);
+            outECB256.append(out_text_3[i]);
+            outOFB128.append(out_text_4[i]);
+            }
+            quint8 text_cbc[64]   = { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a,
+                                   0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c, 0x9e, 0xb7, 0x6f, 0xac, 0x45, 0xaf, 0x8e, 0x51,
+                                   0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4, 0x11, 0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef,
+                                   0xf6, 0x9f, 0x24, 0x45, 0xdf, 0x4f, 0x9b, 0x17, 0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10 };
+
+            quint8 output_cbc[64] = { 0x76, 0x49, 0xab, 0xac, 0x81, 0x19, 0xb2, 0x46, 0xce, 0xe9, 0x8e, 0x9b, 0x12, 0xe9, 0x19, 0x7d,
+                                     0x50, 0x86, 0xcb, 0x9b, 0x50, 0x72, 0x19, 0xee, 0x95, 0xdb, 0x11, 0x3a, 0x91, 0x76, 0x78, 0xb2,
+                                     0x73, 0xbe, 0xd6, 0xb8, 0xe3, 0xc1, 0x74, 0x3b, 0x71, 0x16, 0xe6, 0x9e, 0x22, 0x22, 0x95, 0x16,
+                                     0x3f, 0xf1, 0xca, 0xa1, 0x68, 0x1f, 0xac, 0x09, 0x12, 0x0e, 0xca, 0x30, 0x75, 0x86, 0xe1, 0xa7 };
+
+            for (int i=0; i<64; i++){
+            inCBC128.append(text_cbc[i]);
+            outCBC128.append(output_cbc[i]);
+            }
+            QAESEncryption encryption(QAESEncryption::AES_128, QAESEncryption::ECB);
+            qDebug()<<"befor encode in"<<in;
+            QByteArray encode_ret = encryption.encode(in, key16);
+            qDebug()<<"after encode encode_ret"<<encode_ret;
+            QAESEncryption decode(QAESEncryption::AES_128, QAESEncryption::ECB);
+            qDebug()<<"befor encode outECB128"<<outECB128;
+            QByteArray decode_ret = decode.decode(outECB128, key16);
+            qDebug()<<"after decode decode_ret"<<decode_ret;
+        }
+        break;
+        case 7:
+        {
+            read_start_row = json->Json_Get_Int(CONFIG_NAME,"start_row");
+            qDebug()<<"json测试,read_start_row:"<<read_start_row;
+        }
+        break;
         default:
         {
             qDebug()<<"测试项目为空";
         }
             break;
     }
+}
+
+
+void MainWindow::on_actionrm_dup_triggered()
+{
+    rm_dup *RM_dup = new rm_dup();
+    RM_dup->setWindowFlags (Qt::Window);
+    RM_dup->show ();
 }
 
