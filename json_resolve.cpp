@@ -131,6 +131,7 @@ int Json_resolve::Json_Get_Int(const QString File_Name,const QString key_name)
     if(json_err.error != QJsonParseError::NoError )//文件转换错误
     {
         qDebug()<<"错误类型:"<<json_err.errorString ();
+        return 0;
     }
     // 获取到Json字符串的根节点
     QJsonObject root_object = root_document.object();//根节点
