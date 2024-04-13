@@ -23,6 +23,8 @@
 #include <QTableWidgetItem>
 #include <QDateTime>
 #include <QFileInfo>
+#include <QSize>
+
 //Excel库
 #include "xlsxdocument.h"
 #include "xlsxcellrange.h"
@@ -33,7 +35,9 @@
 #include "qstring_cmp.h"
 #include "json_resolve.h"
 #include "LogHandler.h"
+#include "rm_dup.h"
 //---------------------
+#include "qaesencryption.h"
 typedef enum _COLUMN_HEAD_INDEX
 {
     Change_date     = 1,
@@ -94,9 +98,11 @@ private slots:
     void on_pushButton_open_cmp_clicked();
     void on_pushButton_tst_clicked();
 
+    void on_actionrm_dup_triggered();
 private:
     Ui::MainWindow *ui;
     void Excel_update();
+    QSize Wind_Info();
     QString File_Name_New;
     QString File_Name_Old;
     QString Write_xlsx_name;
@@ -107,8 +113,21 @@ private:
     bool log_enable;
     bool default_open;
     int write_row;
+    int read_start_row;
     QXlsx::Document *Write_xlsx;
     QXlsx::Document *Read_New_BOM;
     QXlsx::Document *Read_Old_BOM;
+    //-------------
+    QByteArray key16;
+    QByteArray key24;
+    QByteArray key32;
+    QByteArray iv;
+    QByteArray in;
+    QByteArray outECB128;
+    QByteArray outECB192;
+    QByteArray outECB256;
+    QByteArray inCBC128;
+    QByteArray outCBC128;
+    QByteArray outOFB128;
 };
 #endif // MAINWINDOW_H
