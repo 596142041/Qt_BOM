@@ -33,51 +33,12 @@
 
 //-----------------------
 #include "qstring_cmp.h"
-#include "json_resolve.h"
+#include "json_resolve.h" //json文件解析
 #include "LogHandler.h"
 #include "rm_dup.h"
 //---------------------
-#include "qaesencryption.h"
-typedef enum _COLUMN_HEAD_INDEX
-{
-    Change_date     = 1,
-    Indx_cnt        = 2,//待修改
-    Model_Name_B    = 3,
-    Factory_B       = 4,
-    Description_B   = 5,
-    Point_B         = 6,
-    Quantity_B      = 7,
-    Model_Name_A    = 8,
-    Factory_A       = 9,
-    Description_A   = 10,
-    Point_A         = 11,
-    Quantity_A      = 12,
-    Change_type     = 13
-}COLUMN_HEAD_INDEX;
-//列宽
-typedef enum _BMP_COLUMN_Width
-{
-    Quantity_With = 7,
-    Indx_Width = 8,
-    Description_With = 11,
-    Change_type_With = 16,
-    Date_Width = 17,
-    Factory_With = 17,
-    Model_Name_With = 30,
-    Point_With = 90
-}COLUMN_With;
-//Excel中各项列号
-typedef enum _BOM_Column_INDEX
-{
-    Quantity_Column = 3,
-    Point_Column = 4,
-    MPN_Column = 5,
-    Factory_Column = 6,
-    MPN1_Column = 7,
-    Factory1_Column = 8,
-    Column_OFFSET =2
-}Excel_Column_INDEX;
-#define CONFIG_NAME "config.json" //配置文件名
+#include "qaesencryption.h" //AES加密测试
+
 //---------------------------
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
