@@ -13,10 +13,10 @@ MainWindow::MainWindow(QWidget *parent)
     Write_xlsx = new QXlsx::Document;
     ui->setupUi(this);
     setWindowFlags(Qt::WindowMinimizeButtonHint|Qt::WindowCloseButtonHint); // 设置禁止最大化
-    QSize win = Wind_Info();
-    qDebug()<<"win = "<<win;
-    this->setMinimumSize(win);//设置最小尺寸，数字可以随情况更改
-    this->setMaximumSize(win);//设置最大尺寸，数字可以随情况更改
+    QSize win_size = Wind_Info();
+    qDebug()<<"win = "<<win_size;
+    this->setMinimumSize(win_size);//设置最小尺寸，数字可以随情况更改
+    this->setMaximumSize(win_size);//设置最大尺寸，数字可以随情况更改
     // 每次选中一个单元格
     ui->tableWidgetdiff->setSelectionBehavior(QAbstractItemView::SelectItems);
 
@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 配置显示信息
     label_info->setFrameStyle(QFrame::Box | QFrame::Sunken);
     label_info->setText(tr("作者:皇甫仁和,本工具仅限个人使用"));
+    label_info->setAlignment (Qt::AlignHCenter|Qt::AlignVCenter);
     label_info->setOpenExternalLinks(false);
     // 将信息增加到底部（永久添加）
     ui->statusbar->addPermanentWidget(label_info);
@@ -161,19 +162,20 @@ void MainWindow::Excel_update()
     qDebug()<<"Write_xlsx_name is :"<<Write_xlsx_name;
     Write_xlsx->addSheet("变更履历",QXlsx::AbstractSheet::ST_WorkSheet);//对工作簿中的表格进行命名
     //-------------------------------------------------------------
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Change_date, COLUMN_With::Date_Width);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Indx_cnt, COLUMN_With::Indx_Width);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_A, COLUMN_With::Model_Name_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_B, COLUMN_With::Model_Name_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Factory_A, COLUMN_With::Factory_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Factory_B, COLUMN_With::Factory_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Description_A, COLUMN_With::Description_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Description_B, COLUMN_With::Description_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Point_A, COLUMN_With::Point_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Point_B, COLUMN_With::Point_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Quantity_A, COLUMN_With::Quantity_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Quantity_B, COLUMN_With::Quantity_With);
-    Write_xlsx->setColumnWidth(COLUMN_HEAD_INDEX::Change_type, COLUMN_With::Change_type_With);
+
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Change_date, json->Wirte_Column_width.Date_Width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Indx_cnt,  json->Wirte_Column_width.Indx_Width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Model_Name_A, json->Wirte_Column_width.MPN_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Model_Name_B, json->Wirte_Column_width.MPN_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Factory_A, json->Wirte_Column_width.Factory_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Factory_B, json->Wirte_Column_width.Factory_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Description_A, json->Wirte_Column_width.Description_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Description_B, json->Wirte_Column_width.Description_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Point_A, json->Wirte_Column_width.Point_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Point_B, json->Wirte_Column_width.Point_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Quantity_A, json->Wirte_Column_width.Quantity_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Quantity_B, json->Wirte_Column_width.Quantity_width);
+    Write_xlsx->setColumnWidth(json->Write_Column_index.Change_type, json->Wirte_Column_width.Change_type_width);
     Write_xlsx->setRowHeight(1,32);
     //合并单元格
     QXlsx::CellRange cellRange;//合并单元格
@@ -182,15 +184,15 @@ void MainWindow::Excel_update()
     cellRange.setLastRow(1);
 
     cellRange.setFirstColumn(1);
-    cellRange.setLastColumn(COLUMN_HEAD_INDEX::Quantity_B);
+    cellRange.setLastColumn(json->Write_Column_index.Quantity_B);
     Write_xlsx->mergeCells(cellRange,format);
 
-    cellRange.setFirstColumn(COLUMN_HEAD_INDEX::Model_Name_A);
-    cellRange.setLastColumn(COLUMN_HEAD_INDEX::Change_type);
+    cellRange.setFirstColumn(json->Write_Column_index.Model_Name_A);
+    cellRange.setLastColumn(json->Write_Column_index.Change_type);
     Write_xlsx->mergeCells(cellRange,format);
     //开始写表头
     format.setFontColor(Qt::red);   // 设置红色
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Model_Name_A,"变更后After\n"+File_Info.baseName (),format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Model_Name_A,"变更后After\n"+File_Info.baseName (),format);
 
     format.setFontColor(QColor(0, 176, 240));   // 设置蓝色
     File_Info.setFile(File_Name_Old);
@@ -201,19 +203,19 @@ void MainWindow::Excel_update()
     format.setFontBold(false);       // 设置加粗
     format.setFontItalic(false);     // 设置倾斜
     format.setFontColor(Qt::black);   // 设置黑色
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Change_date,"变更日期",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Indx_cnt,"No",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Model_Name_B,"物料型号",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Factory_B,"厂家",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Description_B,"物料描述",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Point_B,"位号",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Quantity_B,"用量",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Model_Name_A,"物料型号",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Factory_A,"厂家",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Description_A,"物料描述",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Point_A,"位号",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Quantity_A,"用量",format);
-    Write_xlsx->write (write_row,COLUMN_HEAD_INDEX::Change_type,"更改类型",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Change_date,"变更日期",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Indx_cnt,"No",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Model_Name_B,"物料型号",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Factory_B,"厂家",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Description_B,"物料描述",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Point_B,"位号",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Quantity_B,"用量",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Model_Name_A,"物料型号",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Factory_A,"厂家",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Description_A,"物料描述",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Point_A,"位号",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Quantity_A,"用量",format);
+    Write_xlsx->write (write_row,json->Write_Column_index.Change_type,"更改类型",format);
     write_row++;
     Write_xlsx->saveAs (Write_xlsx_name);
 }
@@ -258,6 +260,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     {
         read_start_row = 2;
     }
+    json->Json_update (CONFIG_NAME);
     Read_New_BOM = new QXlsx::Document(File_Name_New);
     Read_Old_BOM = new QXlsx::Document(File_Name_Old);
     //-------------保存不同项目----------
@@ -266,20 +269,21 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     QString diff_name = QDateTime::currentDateTime().toString("_变更记录-MMdd_hms").append (".xlsx").prepend(File_Info.path()+"/"+File_Info.baseName ());
     QXlsx::Document diff_xlsx(diff_name);//用于保存不同项
     diff_xlsx.addSheet("变更履历",QXlsx::AbstractSheet::ST_WorkSheet);//对工作簿中的表格进行命名
+
     //-------------------------------------------------------------
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Change_date, COLUMN_With::Date_Width);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Indx_cnt, COLUMN_With::Indx_Width);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_A, COLUMN_With::Model_Name_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Model_Name_B, COLUMN_With::Model_Name_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Factory_A, COLUMN_With::Factory_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Factory_B, COLUMN_With::Factory_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Description_A, COLUMN_With::Description_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Description_B, COLUMN_With::Description_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Point_A, COLUMN_With::Point_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Point_B, COLUMN_With::Point_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Quantity_A, COLUMN_With::Quantity_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Quantity_B, COLUMN_With::Quantity_With);
-    diff_xlsx.setColumnWidth(COLUMN_HEAD_INDEX::Change_type, COLUMN_With::Change_type_With);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Change_date, json->Wirte_Column_width.Date_Width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Indx_cnt, json->Wirte_Column_width.Indx_Width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Model_Name_A, json->Wirte_Column_width.MPN_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Model_Name_B, json->Wirte_Column_width.MPN_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Factory_A, json->Wirte_Column_width.Factory_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Factory_B, json->Wirte_Column_width.Factory_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Description_A, json->Wirte_Column_width.Description_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Description_B, json->Wirte_Column_width.Description_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Point_A,json->Wirte_Column_width.Point_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Point_B,json->Wirte_Column_width.Point_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Quantity_A,json->Wirte_Column_width.Quantity_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Quantity_B,json->Wirte_Column_width.Quantity_width);
+    diff_xlsx.setColumnWidth(json->Write_Column_index.Change_type,json->Wirte_Column_width.Change_type_width);
     diff_xlsx.setRowHeight(1,32);
     // 设置单元格格式
     QXlsx::Format format;//仅用于表头的字体格式
@@ -329,11 +333,11 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     cellRange.setLastRow(1);
 
     cellRange.setFirstColumn(1);
-    cellRange.setLastColumn(COLUMN_HEAD_INDEX::Quantity_B);
+    cellRange.setLastColumn(json->Write_Column_index.Quantity_B);
     diff_xlsx.mergeCells(cellRange,Format_cell);
 
-    cellRange.setFirstColumn(COLUMN_HEAD_INDEX::Model_Name_A);
-    cellRange.setLastColumn(COLUMN_HEAD_INDEX::Change_type);
+    cellRange.setFirstColumn(json->Write_Column_index.Model_Name_A);
+    cellRange.setLastColumn(json->Write_Column_index.Change_type);
     diff_xlsx.mergeCells(cellRange,Format_cell);
     //--------------------------------
     Format_cell.setHorizontalAlignment(QXlsx::Format::AlignLeft);// 设置水平左对齐
@@ -345,11 +349,11 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     format.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
 
     File_Info.setFile(File_Name_Old);
-    diff_xlsx.write (write_row,1,"变更前Before\n"+File_Info.baseName (),format);
+    diff_xlsx.write (write_row,1,"变更前Before\n"+File_Info.fileName (),format);
 
     File_Info.setFile(File_Name_New);
     format.setFontColor(Qt::red);   // 设置红色
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_A,"变更后After\n"+File_Info.baseName (),format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_A,"变更后After\n"+File_Info.fileName (),format);
     write_row++;
     format.setFontItalic(false);     // 设置倾斜
     format.setFontColor(Qt::black);   // 设置红色
@@ -357,19 +361,19 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     format.setFontBold(false);       // 设置加粗
     format.setFontSize(12);         // 设置字体大小
 
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,"变更日期",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Indx_cnt,"No",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_B,"物料型号",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_B,"厂家",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"物料描述",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_B,"位号",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_B,"用量",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_A,"物料型号",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_A,"厂家",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"物料描述",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_A,"位号",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_A,"用量",format);
-    diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"更改类型",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Change_date,"变更日期",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Indx_cnt,"No",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_B,"物料型号",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Factory_B,"厂家",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Description_B,"物料描述",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Point_B,"位号",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Quantity_B,"用量",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_A,"物料型号",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Factory_A,"厂家",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Description_A,"物料描述",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Point_A,"位号",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Quantity_A,"用量",format);
+    diff_xlsx.write (write_row,json->Write_Column_index.Change_type,"更改类型",format);
     write_row++;
     //------------------------------------------------
     //直接使用list来查找不同
@@ -377,8 +381,9 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     QStringList mpnA_list,mpnB_list;
     //mpnA_list = Read_colum (Read_New_BOM,2,Excel_Column_INDEX::MPN_Column);
     //mpnB_list = Read_colum (Read_Old_BOM,2,Excel_Column_INDEX::MPN_Column);
-    mpnA_list = Read_colum_List (File_Name_New,read_start_row,Excel_Column_INDEX::MPN_Column);
-    mpnB_list = Read_colum_List (File_Name_Old,read_start_row,Excel_Column_INDEX::MPN_Column);
+
+    mpnA_list = Read_colum_List (File_Name_New,read_start_row,json->BOM_excel_column.MPN_Column);
+    mpnB_list = Read_colum_List (File_Name_Old,read_start_row,json->BOM_excel_column.MPN_Column);
     str_cmp->CMP_set_srtlist (mpnA_list,mpnB_list);
     str_cmp->String_Cmp_list ();
     QStringList same_list = str_cmp->same_strlist;
@@ -412,20 +417,20 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     foreach (const QString& filename, same_list)//遍历
     {
         //获取每一个所在的行;
-        int row_A = mpnA_list.indexOf(filename)+2;
-        int row_B = mpnB_list.indexOf(filename)+2;
-        Read_cell_A = Read_New_BOM->cellAt(row_A,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"))+',';
-        Read_cell_B = Read_Old_BOM->cellAt(row_B,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"))+',';
-        Factory_Cell = Read_Old_BOM->cellAt(row_B,Excel_Column_INDEX::Factory_Column)->value().toString().trimmed().toUpper();
+        int row_A = mpnA_list.indexOf(filename)+read_start_row;
+        int row_B = mpnB_list.indexOf(filename)+read_start_row;
+        Read_cell_A = Read_New_BOM->cellAt(row_A,json->BOM_excel_column.Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"))+',';
+        Read_cell_B = Read_Old_BOM->cellAt(row_B,json->BOM_excel_column.Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"))+',';
+        Factory_Cell = Read_Old_BOM->cellAt(row_B,json->BOM_excel_column.Factory_Column)->value().toString().trimmed().toUpper();
         if(Factory_Cell.length () == 1||Factory_Cell.length () == 0)
         {
-            Factory_Cell = Read_Old_BOM->cellAt(row_B,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET)->value().toString().trimmed().toUpper();
+            Factory_Cell = Read_Old_BOM->cellAt(row_B,json->BOM_excel_column.Factory_Column+json->BOM_excel_column.Column_OFFSET)->value().toString().trimmed().toUpper();
         }
 
-        Factory_Cell_A = Read_New_BOM->cellAt(row_A,Excel_Column_INDEX::Factory_Column)->value().toString().trimmed().toUpper();
+        Factory_Cell_A = Read_New_BOM->cellAt(row_A,json->BOM_excel_column.Factory_Column)->value().toString().trimmed().toUpper();
         if(Factory_Cell_A.length () == 1||Factory_Cell_A.length () == 0)
         {
-            Factory_Cell_A = Read_New_BOM->cellAt(row_A,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET)->value().toString().trimmed().toUpper();
+            Factory_Cell_A = Read_New_BOM->cellAt(row_A,json->BOM_excel_column.Factory_Column+json->BOM_excel_column.Column_OFFSET)->value().toString().trimmed().toUpper();
         }
         //已经获取到位号,下一步位号比较
         str_cmp->CMP_set_srting (Read_cell_A,Read_cell_B);
@@ -446,10 +451,10 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             //型号写入和厂家
             Format_same.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
             Format_same.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_A,filename,Format_same);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_B,filename,Format_same);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_A,Factory_Cell,Format_same);//写入厂家
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_B,Factory_Cell,Format_same);//写入厂家
+            diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_A,filename,Format_same);
+            diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_B,filename,Format_same);
+            diff_xlsx.write (write_row,json->Write_Column_index.Factory_A,Factory_Cell,Format_same);//写入厂家
+            diff_xlsx.write (write_row,json->Write_Column_index.Factory_B,Factory_Cell,Format_same);//写入厂家
             //---------------写入位号----------------
             QXlsx::RichString *rich_diffA = new QXlsx::RichString(); //此处是第一个大的问题点
             QXlsx::RichString *rich_diffB = new QXlsx::RichString();
@@ -483,27 +488,27 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignLeft); //设置左对齐
             Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter); // 设置水平居中
             rich_diffB->addFragment (str_cmp->diff_B,Format_diff_B);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_A,*rich_diffA,Format_cell);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_B,*rich_diffB,Format_cell);
+            diff_xlsx.write (write_row,json->Write_Column_index.Point_A,*rich_diffA,Format_cell);
+            diff_xlsx.write (write_row,json->Write_Column_index.Point_B,*rich_diffB,Format_cell);
 
             //写入描述信息和日期
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"数量变更",format);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,Change_date_str,format);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Indx_cnt,write_row-2,format);
+            diff_xlsx.write (write_row,json->Write_Column_index.Description_A,"",Format_cell);
+            diff_xlsx.write (write_row,json->Write_Column_index.Description_B,"",Format_cell);
+            diff_xlsx.write (write_row,json->Write_Column_index.Change_type,"数量变更",format);
+            diff_xlsx.write (write_row,json->Write_Column_index.Change_date,Change_date_str,format);
+            diff_xlsx.write (write_row,json->Write_Column_index.Indx_cnt,write_row-2,format);
 
             //写入数量
             Format_diff_A.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
             Format_diff_A.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             
             int Quantity_A = str_cmp->same_str.count (",")+str_cmp->diff_A.count (",")+1;
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_A,Quantity_A,Format_diff_A);
+            diff_xlsx.write (write_row,json->Write_Column_index.Quantity_A,Quantity_A,Format_diff_A);
 
             Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
             Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             int Quantity_B = str_cmp->same_str.count (",")+str_cmp->diff_B.count (",")+1;
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_B,Quantity_B,Format_diff_B);
+            diff_xlsx.write (write_row,json->Write_Column_index.Quantity_B,Quantity_B,Format_diff_B);
 
             delete rich_diffB;
             delete rich_diffA;
@@ -532,25 +537,25 @@ void MainWindow::on_pushButton_open_cmp_clicked()
                 Format_same.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
                 Format_same.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
 
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_A,filename,Format_same);
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_B,filename,Format_same);
+                diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_A,filename,Format_same);
+                diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_B,filename,Format_same);
 
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_A,Factory_Cell_A,Format_diff_A);//写入厂家
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_B,Factory_Cell,Format_diff_B);//写入厂家
+                diff_xlsx.write (write_row,json->Write_Column_index.Factory_A,Factory_Cell_A,Format_diff_A);//写入厂家
+                diff_xlsx.write (write_row,json->Write_Column_index.Factory_B,Factory_Cell,Format_diff_B);//写入厂家
 
                 int Quantity = str_cmp->same_str.count (",")+1;
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_A,Quantity,Format_same);
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_B,Quantity,Format_same);
+                diff_xlsx.write (write_row,json->Write_Column_index.Quantity_A,Quantity,Format_same);
+                diff_xlsx.write (write_row,json->Write_Column_index.Quantity_B,Quantity,Format_same);
                 //写入描述信息
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"厂家变更",format);
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,Change_date_str,format);
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Indx_cnt,write_row-2,format);
+                diff_xlsx.write (write_row,json->Write_Column_index.Change_type,"厂家变更",format);
+                diff_xlsx.write (write_row,json->Write_Column_index.Description_A,"",Format_cell);
+                diff_xlsx.write (write_row,json->Write_Column_index.Description_B,"",Format_cell);
+                diff_xlsx.write (write_row,json->Write_Column_index.Change_date,Change_date_str,format);
+                diff_xlsx.write (write_row,json->Write_Column_index.Indx_cnt,write_row-2,format);
                 //写位号
                 Format_same.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置左对齐
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_A,str_cmp->same_str,Format_same);
-                diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_B,str_cmp->same_str,Format_same);
+                diff_xlsx.write (write_row,json->Write_Column_index.Point_A,str_cmp->same_str,Format_same);
+                diff_xlsx.write (write_row,json->Write_Column_index.Point_B,str_cmp->same_str,Format_same);
                 write_row++;
             }
         }
@@ -564,12 +569,12 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     foreach (const QString& filename, diffA_list)//遍历
     {
         int new_diff_row = mpnA_list.indexOf(filename)+2;
-        Factory_Cell = Read_New_BOM->cellAt(new_diff_row,Excel_Column_INDEX::Factory_Column)->value().toString().trimmed().toUpper();
+        Factory_Cell = Read_New_BOM->cellAt(new_diff_row,json->BOM_excel_column.Factory_Column)->value().toString().trimmed().toUpper();
         if(Factory_Cell.length () == 1)
         {
-            Factory_Cell = Read_New_BOM->cellAt(new_diff_row,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET)->value().toString().trimmed().toUpper();
+            Factory_Cell = Read_New_BOM->cellAt(new_diff_row,json->BOM_excel_column.Factory_Column+json->BOM_excel_column.Column_OFFSET)->value().toString().trimmed().toUpper();
         }
-        Read_cell_A = Read_New_BOM->cellAt(new_diff_row,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper();
+        Read_cell_A = Read_New_BOM->cellAt(new_diff_row,json->BOM_excel_column.Point_Column)->value().toString().trimmed().toUpper();
 
         //旧版本BOM不同部分颜色
         Format_diff_B.setFontColor (QColor(0, 176, 240));
@@ -584,17 +589,17 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
         Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
         //型号写入
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_A,filename,Format_diff_A);
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_B,filename,Format_diff_B);
+        diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_A,filename,Format_diff_A);
+        diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_B,filename,Format_diff_B);
 
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_A,Factory_Cell,Format_diff_A);//写入厂家
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_B,Factory_Cell,Format_diff_B);//写入厂家
+        diff_xlsx.write (write_row,json->Write_Column_index.Factory_A,Factory_Cell,Format_diff_A);//写入厂家
+        diff_xlsx.write (write_row,json->Write_Column_index.Factory_B,Factory_Cell,Format_diff_B);//写入厂家
         //写入数量
         int Quantity_A = Read_cell_A.count (",")+1;
         int Quantity_B = 0;
 
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_A,Quantity_A,Format_diff_A);
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_B,Quantity_B,Format_diff_B);
+        diff_xlsx.write (write_row,json->Write_Column_index.Quantity_A,Quantity_A,Format_diff_A);
+        diff_xlsx.write (write_row,json->Write_Column_index.Quantity_B,Quantity_B,Format_diff_B);
         //---------------写入位号----------------
         QXlsx::RichString *rich_diffA = new QXlsx::RichString();
         QXlsx::RichString *rich_diffB = new QXlsx::RichString();
@@ -605,14 +610,14 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置水平居中
         rich_diffB->addFragment ("",Format_diff_B);
 
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_A,*rich_diffA);
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_B,*rich_diffB);
+        diff_xlsx.write (write_row,json->Write_Column_index.Point_A,*rich_diffA);
+        diff_xlsx.write (write_row,json->Write_Column_index.Point_B,*rich_diffB);
         //写入描述信息
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"新增物料",format);
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,Change_date_str,format);
-        diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Indx_cnt,write_row-2,format);
+        diff_xlsx.write (write_row,json->Write_Column_index.Change_type,"新增物料",format);
+        diff_xlsx.write (write_row,json->Write_Column_index.Description_A,"",Format_cell);
+        diff_xlsx.write (write_row,json->Write_Column_index.Description_B,"",Format_cell);
+        diff_xlsx.write (write_row,json->Write_Column_index.Change_date,Change_date_str,format);
+        diff_xlsx.write (write_row,json->Write_Column_index.Indx_cnt,write_row-2,format);
 
         delete rich_diffB;
         delete rich_diffA;
@@ -630,11 +635,11 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         QXlsx::RichString *rich_diffA = new QXlsx::RichString();
         QXlsx::RichString *rich_diffB = new QXlsx::RichString();
         int old_diff_row = mpnB_list.indexOf(filename)+2;
-        Read_cell_B  = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"));
-        Factory_Cell = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Factory_Column)->value().toString().trimmed().toUpper();
+        Read_cell_B  = Read_Old_BOM->cellAt(old_diff_row,json->BOM_excel_column.Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"));
+        Factory_Cell = Read_Old_BOM->cellAt(old_diff_row,json->BOM_excel_column.Factory_Column)->value().toString().trimmed().toUpper();
         if(Factory_Cell.length () == 1)
         {
-            Factory_Cell = Read_Old_BOM->cellAt(old_diff_row,Excel_Column_INDEX::Factory_Column+Excel_Column_INDEX::Column_OFFSET)->value().toString().trimmed().toUpper();
+            Factory_Cell = Read_Old_BOM->cellAt(old_diff_row,json->BOM_excel_column.Factory_Column+json->BOM_excel_column.Column_OFFSET)->value().toString().trimmed().toUpper();
         }
 
         dis_cnt = dis_diffA_list->indexOf (Read_cell_B.remove(QRegExp("\\s")));
@@ -657,21 +662,21 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
             Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             //型号写入
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_A,filename,Format_diff_A);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Model_Name_B,filename,Format_diff_B);
+            diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_A,filename,Format_diff_A);
+            diff_xlsx.write (write_row,json->Write_Column_index.Model_Name_B,filename,Format_diff_B);
 
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_A,Factory_Cell,Format_diff_A);//写入厂家
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Factory_B,Factory_Cell,Format_diff_B);//写入厂家
+            diff_xlsx.write (write_row,json->Write_Column_index.Factory_A,Factory_Cell,Format_diff_A);//写入厂家
+            diff_xlsx.write (write_row,json->Write_Column_index.Factory_B,Factory_Cell,Format_diff_B);//写入厂家
             //写入数量
             Format_diff_A.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
             Format_diff_A.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             int Quantity_A = 0;
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_A,Quantity_A,Format_diff_A);
+            diff_xlsx.write (write_row,json->Write_Column_index.Quantity_A,Quantity_A,Format_diff_A);
 
             Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
             Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             int Quantity_B = Read_cell_B.count (",")+1;
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Quantity_B,Quantity_B,Format_diff_B);
+            diff_xlsx.write (write_row,json->Write_Column_index.Quantity_B,Quantity_B,Format_diff_B);
 
             Format_diff_A.setHorizontalAlignment(QXlsx::Format::AlignLeft); // 设置水平居中
             Format_diff_A.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
@@ -681,14 +686,14 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             rich_diffB->addFragment (Read_cell_B,Format_diff_B);
 
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_A,*rich_diffA);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Point_B,*rich_diffB);
+            diff_xlsx.write (write_row,json->Write_Column_index.Point_A,*rich_diffA);
+            diff_xlsx.write (write_row,json->Write_Column_index.Point_B,*rich_diffB);
             //写入描述信息
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_type,"删除物料",format);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_A,"",Format_cell);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Description_B,"",Format_cell);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Change_date,Change_date_str,format);
-            diff_xlsx.write (write_row,COLUMN_HEAD_INDEX::Indx_cnt,write_row-2,format);
+            diff_xlsx.write (write_row,json->Write_Column_index.Change_type,"删除物料",format);
+            diff_xlsx.write (write_row,json->Write_Column_index.Description_A,"",Format_cell);
+            diff_xlsx.write (write_row,json->Write_Column_index.Description_B,"",Format_cell);
+            diff_xlsx.write (write_row,json->Write_Column_index.Change_date,Change_date_str,format);
+            diff_xlsx.write (write_row,json->Write_Column_index.Indx_cnt,write_row-2,format);
             write_row++;
         }
         else
@@ -701,8 +706,8 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_same.setFontColor (Qt::black);
             rich_diffB->addFragment(Read_cell_B,Format_same);
             //位号写入
-            diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Point_A,*rich_diffB,Format_cell);
-            diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Point_B,*rich_diffB,Format_cell);
+            diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Point_A,*rich_diffB,Format_cell);
+            diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Point_B,*rich_diffB,Format_cell);
 
             //型号写入
             Format_diff_B.setFontBold(true);       // 设定加粗
@@ -713,25 +718,25 @@ void MainWindow::on_pushButton_open_cmp_clicked()
             Format_diff_B.setHorizontalAlignment(QXlsx::Format::AlignHCenter); // 设置水平居中
             Format_diff_B.setVerticalAlignment(QXlsx::Format::AlignVCenter);   // 设置垂直居中
             //型号写入
-            diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Model_Name_B,filename,Format_diff_B);
+            diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Model_Name_B,filename,Format_diff_B);
             //写入厂家
             //判断厂家
             if(Factory_Cell.compare (dis_diffA_Factory_list->at (dis_cnt),Qt::CaseSensitive) == 0)//相同厂家
             {
                 Format_same.setHorizontalAlignment(QXlsx::Format::AlignHCenter); //设置左对齐
-                diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Factory_A,Factory_Cell,Format_same);//写入厂家
-                diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Factory_B,Factory_Cell,Format_same);//写入厂家
+                diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Factory_A,Factory_Cell,Format_same);//写入厂家
+                diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Factory_B,Factory_Cell,Format_same);//写入厂家
             }
             else
             {
-                diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Factory_B,Factory_Cell,Format_diff_B);//写入厂家
+                diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Factory_B,Factory_Cell,Format_diff_B);//写入厂家
             }
             //写入数量
             int Quantity = Read_cell_B.count (",")+1;
             Format_same.setHorizontalAlignment(QXlsx::Format::AlignHCenter); //设置左对齐
-            diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Quantity_B,Quantity,Format_same);
-            diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Quantity_A,Quantity,Format_same);
-            diff_xlsx.write (dis_start+dis_cnt,COLUMN_HEAD_INDEX::Change_type,"更改型号",format);
+            diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Quantity_B,Quantity,Format_same);
+            diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Quantity_A,Quantity,Format_same);
+            diff_xlsx.write (dis_start+dis_cnt,json->Write_Column_index.Change_type,"更改型号",format);
         }
         delete rich_diffB;
         delete rich_diffA;
@@ -744,11 +749,11 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     bool Hidden_status = json->Json_Get_Bool(CONFIG_NAME,"是否隐藏");
     if(Hidden_status == true)
     {
-        diff_xlsx.setColumnHidden (COLUMN_HEAD_INDEX::Quantity_A,true);
-        diff_xlsx.setColumnHidden (COLUMN_HEAD_INDEX::Quantity_B,true);
-        diff_xlsx.setColumnHidden (COLUMN_HEAD_INDEX::Description_A,true);
-        diff_xlsx.setColumnHidden (COLUMN_HEAD_INDEX::Description_B,true);
-        diff_xlsx.setColumnHidden(COLUMN_HEAD_INDEX::Change_date,COLUMN_HEAD_INDEX::Indx_cnt,true);
+        diff_xlsx.setColumnHidden (json->Write_Column_index.Quantity_A,true);
+        diff_xlsx.setColumnHidden (json->Write_Column_index.Quantity_B,true);
+        diff_xlsx.setColumnHidden (json->Write_Column_index.Description_A,true);
+        diff_xlsx.setColumnHidden (json->Write_Column_index.Description_B,true);
+        diff_xlsx.setColumnHidden(json->Write_Column_index.Change_date,json->Write_Column_index.Indx_cnt,true);
     }
     diff_xlsx.save();//保存Excel
     write_row = 1;
@@ -774,8 +779,7 @@ void MainWindow::on_pushButton_tst_clicked()
     {
         case 1:
         {
-            bool status = json->Json_Get_Bool(CONFIG_NAME,"日志记录使能");
-            qDebug()<<"json测试,日志记录使能状态:"<<status;
+            json->Json_update (CONFIG_NAME);
         }
         break;
         case 2:
@@ -963,7 +967,7 @@ void MainWindow::on_pushButton_tst_clicked()
         {
             qDebug()<<"测试项目为空";
         }
-            break;
+        break;
     }
 }
 
