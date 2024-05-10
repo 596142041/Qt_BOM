@@ -1,26 +1,12 @@
 {
-    "BOM_Column": {
-        "Column_OFFSET": 2,
+    "BOM_Column_Index": {
+        "Column_OFFSET": 0,
         "Description": "表示当前BOM表中对应的列",
-        "Factory1_Column": 8,
-        "Factory_Column": 6,
-        "MPN1_Column": 7,
-        "MPN_Column": 5,
-        "Point_Column": 4,
-        "Quantity_Column": 3
+        "Factory_Column": "H",
+        "MPN_Column": "G",
+        "Point_Column": "D"
     },
-    "Write_Column_Width": {
-        "Change_type_Width": 16,
-        "Date_Width": 17,
-        "Description": "表示写入的对比表格中的列的宽度",
-        "Description_Width": 11,
-        "Factory_With": 17,
-        "Indx_Width": 8,
-        "Model_Name_Width": 30,
-        "Point_Width": 90,
-        "Quantity_Width": 7
-    },
-    "Write_HEAD_INDEX": {
+    "Write_Column_Index": {
         "Change_date": 1,
         "Change_type": 13,
         "Description_A": 10,
@@ -35,13 +21,28 @@
         "Quantity_A": 12,
         "Quantity_B": 7
     },
-    "blog": "https: //www.cnblogs.com/lyshark",
-    "enable": true,
-    "status": false,
-    "test_status": 6,
-    "变更前文件路径": "E:/金康/SE BOM汇总/C01-1220/SE150H-C01-20231122.xlsx",
-    "变更后文件路径": "E:/金康/SE BOM汇总/C02-0205/SE150H-C02-20240205.xlsx",
+    "Write_Column_Width": {
+        "Change_type_Width": 16,
+        "Date_Width": 17,
+        "Description": "表示写入的对比表格中的列的宽度",
+        "Description_Width": 11,
+        "Factory_Width": 17,
+        "Indx_Width": 8,
+        "Model_Name_Width": 30,
+        "Point_Width": 90,
+        "Quantity_Width": 7
+    },
+    "start_row": 5,
+    "start_row_A": 5,
+    "start_row_B": 5,
+    "test_status": 1,
+    "wind_height": 840,
+    "wind_width": 1265,
+    "变更前文件路径": "D:/青山工业_BOM/TS_HVDI_C&DB_BOM_V1.3.xlsx",
+    "变更后文件路径": "D:/青山工业_BOM/TS_HVDI_C&DB_BOM_V1.4.xlsx",
     "日志记录使能": true,
-    "比较结果文件路径": "E:/金康/SE BOM汇总/C02-0205/SE150H-C02-20240205_变更记录-0227_203814.xlsx",
-    "测试按钮使能": true
+    "是否隐藏": false,
+    "比较结果文件路径": "D:/青山工业_BOM/TS_HVDI_C&DB_BOM_V1_变更记录-0510_233329.xlsx",
+    "测试按钮使能": true,
+    "默认文件打开使能": true
 }
