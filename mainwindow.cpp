@@ -266,7 +266,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     //-------------保存不同项目----------
     QFileInfo File_Info;
     File_Info.setFile (File_Name_New);
-    QString diff_name = QDateTime::currentDateTime().toString("_变更记录-MMdd_hms").append (".xlsx").prepend(File_Info.path()+"/"+File_Info.baseName ());
+    QString diff_name = QDateTime::currentDateTime().toString("_变更记录-MMdd_hms").append (".xlsx").prepend(File_Info.path()+"/"+File_Info.completeBaseName ());
     QXlsx::Document diff_xlsx(diff_name);//用于保存不同项
     diff_xlsx.addSheet("变更履历",QXlsx::AbstractSheet::ST_WorkSheet);//对工作簿中的表格进行命名
 
