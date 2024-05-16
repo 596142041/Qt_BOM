@@ -117,6 +117,7 @@ public:
     void Json_Set_KeyValue(const QString File_Name,const QString key_name,const QString value);
     QString Json_Get_KeyValue(const QString File_Name,const QString key_name);
     bool Json_Get_Bool(const QString File_Name,const QString key_name);
+    void Json_Set_Bool(const QString File_Name,const QString key_name,const bool value);
     int Json_Get_Int(const QString File_Name,const QString key_name);
     double Json_Get_Float(const QString File_Name,const QString key_name);
     void Json_update(const QString File_Name);
