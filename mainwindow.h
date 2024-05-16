@@ -60,6 +60,8 @@ private slots:
     void on_pushButton_tst_clicked();
 
     void on_actionrm_dup_triggered();
+    void on_checkBox_Autoopen_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     void Excel_update();

@@ -42,6 +42,15 @@ MainWindow::MainWindow(QWidget *parent)
     tst_btn_enable = json->Json_Get_Bool(CONFIG_NAME,"测试按钮使能");
     log_enable = json->Json_Get_Bool(CONFIG_NAME,"日志记录使能");
     default_open = false;
+    default_open = json->Json_Get_Bool(CONFIG_NAME,"默认文件打开使能");
+    if(default_open == true)
+    {
+        ui->checkBox_Autoopen->setChecked(true);
+    }
+    else
+    {
+        ui->checkBox_Autoopen->setChecked(false);
+    }
     if(tst_btn_enable == true)
     {
         ui->pushButton_tst->setEnabled (true);
@@ -256,7 +265,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
         return;
     }
     read_start_row = json->Json_Get_Int(CONFIG_NAME,"start_row");
-    if(read_start_row == 0 || read_start_row > 4)
+    if(read_start_row == 0 || read_start_row > 10)
     {
         read_start_row = 2;
     }
@@ -391,9 +400,11 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     QStringList diffB_list = str_cmp->diffB_list;
     if(log_enable == true)//开启日志记录
     {
-        qInfo()<<"  相同型号:\n"<<same_list<<"\n";
-        qInfo()<<"  新增型号:\n"<<diffA_list<<"\n";
-        qInfo()<<"  删除的型号:\n"<<diffB_list<<"\n";
+        qInfo()<<"mpnA_list:\n"<<mpnA_list<<"\n";
+        qInfo()<<"mpnB_list:\n"<<mpnB_list<<"\n";
+        qInfo()<<"相同型号:\n"<<same_list<<"\n";
+        qInfo()<<"新增型号:\n"<<diffA_list<<"\n";
+        qInfo()<<"删除的型号:\n"<<diffB_list<<"\n";
     }
     QString Change_date_str = QDateTime::currentDateTime().toString("yyyy年MM月dd日");
     QStringList *dis_diffA_list  = new QStringList;
@@ -568,7 +579,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     dis_start = write_row;
     foreach (const QString& filename, diffA_list)//遍历
     {
-        int new_diff_row = mpnA_list.indexOf(filename)+2;
+        int new_diff_row = mpnA_list.indexOf(filename)+read_start_row;
         Factory_Cell = Read_New_BOM->cellAt(new_diff_row,json->BOM_excel_column.Factory_Column)->value().toString().trimmed().toUpper();
         if(Factory_Cell.length () == 1)
         {
@@ -634,7 +645,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     {
         QXlsx::RichString *rich_diffA = new QXlsx::RichString();
         QXlsx::RichString *rich_diffB = new QXlsx::RichString();
-        int old_diff_row = mpnB_list.indexOf(filename)+2;
+        int old_diff_row = mpnB_list.indexOf(filename)+read_start_row;
         Read_cell_B  = Read_Old_BOM->cellAt(old_diff_row,json->BOM_excel_column.Point_Column)->value().toString().trimmed().toUpper().remove(QRegExp("\\s"));
         Factory_Cell = Read_Old_BOM->cellAt(old_diff_row,json->BOM_excel_column.Factory_Column)->value().toString().trimmed().toUpper();
         if(Factory_Cell.length () == 1)
@@ -761,7 +772,7 @@ void MainWindow::on_pushButton_open_cmp_clicked()
     //替换文件名中"/"
     diff_name.replace("/","\\");
     default_open = json->Json_Get_Bool(CONFIG_NAME,"默认文件打开使能");
-    if(ui->checkBox_Autoopen->checkState ()==Qt::Checked)//如果使能默认打开文件,比较完成之后直接打开文件,可以通过json文件配置
+    if(ui->checkBox_Autoopen->checkState ()==Qt::Checked || default_open == true)//如果使能默认打开文件,比较完成之后直接打开文件,可以通过json文件配置
     {
        ShellExecuteW(NULL,QString("open").toStdWString().c_str(),diff_name.toStdWString().c_str(),NULL,NULL,SW_SHOW);
     }
@@ -779,7 +790,7 @@ void MainWindow::on_pushButton_tst_clicked()
     {
         case 1:
         {
-            json->Json_update (CONFIG_NAME);
+
         }
         break;
         case 2:
@@ -927,11 +938,11 @@ void MainWindow::on_pushButton_tst_clicked()
 
             for (int i=0; i<16; i++)
             {
-            in.append(in_text[i]);
-            outECB128.append(out_text[i]);
-            outECB192.append(out_text_2[i]);
-            outECB256.append(out_text_3[i]);
-            outOFB128.append(out_text_4[i]);
+                    in.append(in_text[i]);
+                    outECB128.append(out_text[i]);
+                    outECB192.append(out_text_2[i]);
+                    outECB256.append(out_text_3[i]);
+                    outOFB128.append(out_text_4[i]);
             }
             quint8 text_cbc[64]   = { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a,
                                    0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c, 0x9e, 0xb7, 0x6f, 0xac, 0x45, 0xaf, 0x8e, 0x51,
@@ -943,9 +954,10 @@ void MainWindow::on_pushButton_tst_clicked()
                                      0x73, 0xbe, 0xd6, 0xb8, 0xe3, 0xc1, 0x74, 0x3b, 0x71, 0x16, 0xe6, 0x9e, 0x22, 0x22, 0x95, 0x16,
                                      0x3f, 0xf1, 0xca, 0xa1, 0x68, 0x1f, 0xac, 0x09, 0x12, 0x0e, 0xca, 0x30, 0x75, 0x86, 0xe1, 0xa7 };
 
-            for (int i=0; i<64; i++){
-            inCBC128.append(text_cbc[i]);
-            outCBC128.append(output_cbc[i]);
+            for (int i=0; i<64; i++)
+            {
+                inCBC128.append(text_cbc[i]);
+                outCBC128.append(output_cbc[i]);
             }
             QAESEncryption encryption(QAESEncryption::AES_128, QAESEncryption::ECB);
             qDebug()<<"befor encode in"<<in;
@@ -979,3 +991,22 @@ void MainWindow::on_actionrm_dup_triggered()
     RM_dup->show ();
 }
 
+
+void MainWindow::on_checkBox_Autoopen_stateChanged(int arg1)
+{
+    qDebug()<<arg1;
+    if(arg1 == Qt::Checked)
+    {
+        if(json->Json_Get_Bool(CONFIG_NAME,"默认文件打开使能") == false)
+        {
+            json->Json_Set_Bool(CONFIG_NAME,"默认文件打开使能",true);
+        }
+    }
+    else if(arg1 == Qt::Unchecked)
+    {
+        if(json->Json_Get_Bool(CONFIG_NAME,"默认文件打开使能") == true)
+        {
+            json->Json_Set_Bool(CONFIG_NAME,"默认文件打开使能",false);
+        }
+    }
+}
